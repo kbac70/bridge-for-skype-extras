@@ -24,6 +24,8 @@ public:
     STDMETHOD(Open)(/* [in] */ POPEN_CONTEXT OpenContext);    
     STDMETHOD(ShowSettingsDlg)( /* [in] */ OLE_HANDLE WndOwner);    
     STDMETHOD(Finalize)(void);
+
+	void Shutdown();
 private:
 	_bstr_t m_id;
 	_bstr_t m_params;

@@ -1,53 +1,69 @@
 #include "stdafx.h"
-#include "comutil.h"
 #include "PipePumpingThread.h"
 #include "AnonymousPipe.h"
-#include "BSTRHelper.h"
 #include "Protocol.h"
+#include "ChildProcessManager.h"
 
 #define PROCESS_TERMINATION_ALLOWANCE 1000
 
-DWORD PipeReadingThread( LPVOID* pArguments ) 
+DWORD PipeManagingThread( LPVOID* pArguments ) 
 {
+	assert(pArguments != NULL);
+
 	PipePumpingThread& t = *((PipePumpingThread*)pArguments);
 	AnonymousPipe pipe = AnonymousPipe(t.GetID());
-	_bstr_t response;
-	
-	while(!t.isTerminated() || t.HasRequest())
-	{
-		if (t.HasRequest())
-		{
-			_bstr_t payload(t.NextRequest());
-			pipe.Write(payload);
 
-			Sleep(100);
-		} 
-		else
+	if (pipe.GetChildProcessManager().IsChildProcessCreated())
+	{
+		std::string response;
+
+		while(!t.isTerminated() || t.HasRequest())
 		{
-			const long responseSize = pipe.ResponseSize();
-			if (responseSize > 0)
+			if (t.HasRequest())
 			{
-				const long responseID = pipe.Read(response, responseSize);
-				if(PipePumpingThread::INVALID_ID != responseID)
+				std::string payload(t.NextRequest());
+				pipe.Write(payload);
+			} 
+			else
+			{
+				const long responseSize = pipe.ResponseSize();
+				if (responseSize > 0)
 				{
-					t.ReadResponse(responseID, response);
+					const long responseID = pipe.Read(response, responseSize);
+					if(PipePumpingThread::INVALID_ID != responseID)
+					{
+						t.ReadResponse(responseID, response);
+					}
+				}
+				else
+				{
+					if (!ChildProcessManager::IsSkypeRunning())
+					{
+						//pipe.Write(t.Abort());
+					}
+					Sleep(150);
 				}
 			}
 		}
 
-		Sleep(50);
+		Sleep(2 * PROCESS_TERMINATION_ALLOWANCE);
 	}
 
-	Sleep(PROCESS_TERMINATION_ALLOWANCE);
 	return 0;
 }
 
 
-PipePumpingThread::PipePumpingThread(_bstr_t& id)
-: hThread(NULL), m_terminated(false), dwThreadID(0), m_id(new BSTRHelper(id)), isSuspended(true)
+PipePumpingThread::PipePumpingThread(std::string& id)
+: hThread(NULL), m_terminated(false), dwThreadID(0), m_id(id), isSuspended(true)
 {
-	hThread = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)PipeReadingThread,
+	hThread = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)PipeManagingThread,
 		(LPVOID)this, BELOW_NORMAL_PRIORITY_CLASS | CREATE_SUSPENDED, &dwThreadID);
+
+	char shutdown[BUFFER_SIZE];
+	Protocol::EncodeShutdown(shutdown, m_id.c_str());
+	char shutdownMsg[BUFFER_SIZE];
+	Protocol::EncodeMessageID(shutdownMsg, msgID++, shutdown);
+	m_abortRequest = std::string(shutdownMsg);
 }
 
 PipePumpingThread::~PipePumpingThread()
@@ -60,9 +76,14 @@ PipePumpingThread::~PipePumpingThread()
 		WaitForSingleObject(hThread, 3 * PROCESS_TERMINATION_ALLOWANCE);
 		CloseHandle(hThread);
 	}
-	
-	delete m_id;
 }
+
+std::string& PipePumpingThread::Abort()
+{
+	m_terminated = true;
+	return m_abortRequest;
+}
+
 
 void PipePumpingThread::Resume()
 {
@@ -70,18 +91,17 @@ void PipePumpingThread::Resume()
 		ResumeThread(hThread);
 }
 
-long PipePumpingThread::WriteRequest(const _bstr_t& payload)
+long PipePumpingThread::WriteRequest(const std::string& Payload)
 {
 	Resume();
 
 	long ret = msgID++;
 	
 	char buffer[BUFFER_SIZE];	
-	BSTRHelper msg = BSTRHelper(payload);
-	int len = Protocol::EncodeMessageID(buffer, ret, msg.c_str());
+	int len = Protocol::EncodeMessageID(buffer, ret, Payload.c_str());
 	if (len > 0)
 	{
-		_bstr_t p = _bstr_t(buffer);
+		std::string p = std::string(buffer);
 		m_outQ.push(p);	
 		return ret;
 	}
@@ -89,41 +109,53 @@ long PipePumpingThread::WriteRequest(const _bstr_t& payload)
 	return PipePumpingThread::INVALID_ID;
 }
 
-_bstr_t PipePumpingThread::SyncWriteRequest(const _bstr_t& payload)
+std::string PipePumpingThread::SyncWriteRequest(const std::string& Payload)
 {
 	Resume();
 
-	long requestID = WriteRequest(payload);
+	char buffer[BUFFER_SIZE];
+	Protocol::EncodeResponseThreadAborted(buffer, 0, Payload.c_str());
+	std::string ret(buffer);
 
-	for(int i = 0; i < 10; i++)
+	if (!m_terminated)
 	{
-		if (this->HasResponse(requestID))
+		long requestID = WriteRequest(Payload);
+
+		for(int i = 0; !m_terminated && i < 10; i++)
 		{
-			return this->GetResponse(requestID);
+			if (this->HasResponse(requestID))
+			{
+				return this->GetResponse(requestID);
+			}
+			Sleep(250);
 		}
-		Sleep(250);
+		if (!m_terminated)
+		{
+			Protocol::EncodeResponseTimeout(buffer, requestID, Payload.c_str());
+			return std::string(buffer);
+		}
 	}
-	return _bstr_t("ERROR|TIMEOUT");
+	return ret;
 }
 
-void PipePumpingThread::ReadResponse(const long id, const _bstr_t& response)
+void PipePumpingThread::ReadResponse(const long id, const std::string& response)
 {
 	Resume();
 
-	m_inQ.insert(std::pair<long, _bstr_t>(id, response));
+	m_inQ.insert(std::pair<long, std::string>(id, response));
 }
 
-_bstr_t PipePumpingThread::NextRequest()
+std::string PipePumpingThread::NextRequest()
 { 
 	Resume();
 
 	if (this->HasRequest())
 	{
-		_bstr_t cmd = m_outQ.front();
+		std::string cmd = m_outQ.front();
 		m_outQ.pop();
 		return cmd;
 	}
-	return _bstr_t(); 
+	return std::string(); 
 }
 
 bool PipePumpingThread::HasRequest() 
@@ -136,18 +168,18 @@ bool PipePumpingThread::HasResponse(const long id)
 	return m_inQ.find(id) != m_inQ.end();
 }
 
-_bstr_t PipePumpingThread::GetResponse(const long id)
+std::string PipePumpingThread::GetResponse(const long id)
 {
 	Resume();
 
-	std::map<long, _bstr_t>::iterator response = m_inQ.find(id);
+	std::map<long, std::string>::iterator response = m_inQ.find(id);
 	if (response != m_inQ.end())
 	{
-		_bstr_t ret = (response)->second;
+		std::string ret = (response)->second;
 		m_inQ.erase(response);
 		return ret;
 	}
-	return _bstr_t();
+	return std::string();
 }
 
 const long PipePumpingThread::INVALID_ID = -1;

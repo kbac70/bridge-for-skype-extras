@@ -15,5 +15,5 @@ public:
 	void CheckIsInstalled();
 
 private:
-	std::string windowsDir;
+	std::string m_windowsDir;
 };

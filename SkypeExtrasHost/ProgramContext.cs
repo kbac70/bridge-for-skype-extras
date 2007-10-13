@@ -16,6 +16,8 @@ namespace Skype.Extension.Utils.PluginB.Host
 
         public ProgramContext(string[] args)
         {
+            Contract.EnsureArgumentNotNull(args, "args");
+
             Process thisProcess = Process.GetCurrentProcess();
 
             if (args.Length > 0)
@@ -27,14 +29,15 @@ namespace Skype.Extension.Utils.PluginB.Host
                     Application.ThreadException += OnUnhandledException;
                     Application.ThreadExit += OnThreadExit;
                     Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-
+                    
                     if (!IsDebugging)
                     {
                         Windows.ShowWindow(thisProcess.MainWindowHandle, Windows.SW_HIDE);
                     }
-                    
+             
                     thread = new PipeListenerThread(this);
                     thread.Start();
+
                 }
                 else
                 {
@@ -74,11 +77,14 @@ namespace Skype.Extension.Utils.PluginB.Host
 
         public static void ShowError(Exception e)
         {
-            System.Windows.Forms.MessageBox.Show(e.Message + Environment.NewLine + e.StackTrace,
-                    "Unhandled Error Occured",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-               );
+            if (SkypeServices.IsSkypeRunning)
+            {
+                System.Windows.Forms.MessageBox.Show(e.Message + Environment.NewLine + e.StackTrace,
+                        "Unhandled Error Occured",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                   );
+            }
         }
 
         private void OnUnhandledException(object sender, ThreadExceptionEventArgs args)

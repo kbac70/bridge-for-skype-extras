@@ -1,11 +1,15 @@
 #pragma once
 
+#include <string>
+
 /**
  * Wrapper of the child process which is meant to host a .NET plugin for Skype.
  * @author: KBac
  */
 class ChildProcessManager
 {
+public:
+	static bool IsSkypeRunning();
 public:
 	ChildProcessManager(void);
 	~ChildProcessManager(void);
@@ -27,7 +31,22 @@ public:
 	 * @Returns true on success
      */
 	bool IsChildProcessAvailable();
-
+	/**
+	 * @Return Process information of the child process
+	 */
+	const PROCESS_INFORMATION& GetProcessInfo() const { return *m_piProcInfo; }
+	/**
+	 * @Return True when there is no Skype instance running
+	 */
+	bool ShouldChildProcessTerminate() const;
+	/**
+	 *@Return true when m_piProcInfo contains valid process id
+	 */
+	bool IsChildProcessCreated() const;
+	/**
+	 *@Return main module handle of the child process
+	 */
+	HMODULE GetChildProcessMainModule() const;
 private:
-	PROCESS_INFORMATION* piProcInfo;
+	PROCESS_INFORMATION* m_piProcInfo;
 };

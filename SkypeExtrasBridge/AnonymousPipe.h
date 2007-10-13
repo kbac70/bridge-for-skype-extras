@@ -1,7 +1,8 @@
 #pragma once
 
+#include <string>
+
 class ChildProcessManager;
-class _bstr_t;
 class BSTRHelper;
 
 /**
@@ -14,7 +15,7 @@ class BSTRHelper;
 class AnonymousPipe
 {
 public:
-	AnonymousPipe(const BSTRHelper& id);
+	AnonymousPipe(const std::string& PluginID);
 	~AnonymousPipe(void);
 public:
 	/**
@@ -27,23 +28,26 @@ public:
 	 * advised to use it in combination with ResponseSize. The buf parameter will receive the message body.
 	 * @Return Message ID as defined by the protocol.
 	 */
-	long Read(_bstr_t& buf, long responseSize);
+	long Read(std::string& Buffer, long ResponseSize);
 	/**
 	 * Writes contensts of the payload into the pipe.
 	 */
-	void Write(_bstr_t& payload);
-
+	void Write(std::string& Payload);
+	/**
+	 * @Return const reference to instance of ChildProcessManager
+	 */
+	const ChildProcessManager& GetChildProcessManager()	{ return *m_processManager; }
 private:
 	AnonymousPipe& operator = (AnonymousPipe& lhs);
 	
-	HANDLE hChildStdOutRead;
-	HANDLE hChildStdOutWrite;
-	HANDLE hChildStdInWrite;
-	HANDLE hChildStdInRead;
+	HANDLE m_hChildStdOutRead;
+	HANDLE m_hChildStdOutWrite;
+	HANDLE m_hChildStdInWrite;
+	HANDLE m_hChildStdInRead;
 	ChildProcessManager* m_processManager;
 
-	const BSTRHelper& m_id;
+	const std::string& m_id;
 
 	void Cleanup();
-	void SafeCloseHandle(HANDLE* handle);
+	void SafeCloseHandle(HANDLE* Handle);
 };

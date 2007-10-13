@@ -1,14 +1,13 @@
 #include "stdafx.h"
 #include "AnonymousPipe.h"
 #include "ChildProcessManager.h"
-#include "BSTRHelper.h"
 #include "PipePumpingThread.h"
 #include "Protocol.h"
 
 
 
-AnonymousPipe::AnonymousPipe(const BSTRHelper& id)
-: m_id(id), hChildStdOutRead(NULL), hChildStdOutWrite(NULL), m_processManager(NULL)
+AnonymousPipe::AnonymousPipe(const std::string& PluginID)
+: m_id(PluginID), m_hChildStdOutRead(NULL), m_hChildStdOutWrite(NULL), m_processManager(NULL)
 {
 	m_processManager = new ChildProcessManager();
 
@@ -19,43 +18,43 @@ AnonymousPipe::AnonymousPipe(const BSTRHelper& id)
 	saAttr.lpSecurityDescriptor = NULL;
 
 	// Create a pipe for the child process's STDOUT.
-	if (CreatePipe(&hChildStdOutRead, &hChildStdOutWrite, &saAttr, BUFFER_SIZE))
+	if (CreatePipe(&m_hChildStdOutRead, &m_hChildStdOutWrite, &saAttr, BUFFER_SIZE))
 	{
 		// Ensure the read handle to the pipe for STDOUT is not inherited.
-		SetHandleInformation( hChildStdOutRead, HANDLE_FLAG_INHERIT, 0);
+		SetHandleInformation( m_hChildStdOutRead, HANDLE_FLAG_INHERIT, 0);
 
-		SetHandleInformation( hChildStdOutRead, HANDLE_FLAG_PROTECT_FROM_CLOSE, HANDLE_FLAG_PROTECT_FROM_CLOSE);
-		SetHandleInformation( hChildStdOutWrite, HANDLE_FLAG_PROTECT_FROM_CLOSE, HANDLE_FLAG_PROTECT_FROM_CLOSE);
+		SetHandleInformation( m_hChildStdOutRead, HANDLE_FLAG_PROTECT_FROM_CLOSE, HANDLE_FLAG_PROTECT_FROM_CLOSE);
+		SetHandleInformation( m_hChildStdOutWrite, HANDLE_FLAG_PROTECT_FROM_CLOSE, HANDLE_FLAG_PROTECT_FROM_CLOSE);
 	}
 
 	// Create a pipe for the child process's STDIN.
-	if (CreatePipe(&hChildStdInRead, &hChildStdInWrite, &saAttr, 0))
+	if (CreatePipe(&m_hChildStdInRead, &m_hChildStdInWrite, &saAttr, 0))
 	{
 		// Ensure the write handle to the pipe for STDIN is not inherited.
-		SetHandleInformation( hChildStdInWrite, HANDLE_FLAG_INHERIT, 0);
+		SetHandleInformation( m_hChildStdInWrite, HANDLE_FLAG_INHERIT, 0);
 
-		SetHandleInformation( hChildStdInWrite, HANDLE_FLAG_PROTECT_FROM_CLOSE, HANDLE_FLAG_PROTECT_FROM_CLOSE);
-		SetHandleInformation( hChildStdInRead, HANDLE_FLAG_PROTECT_FROM_CLOSE, HANDLE_FLAG_PROTECT_FROM_CLOSE);
+		SetHandleInformation( m_hChildStdInWrite, HANDLE_FLAG_PROTECT_FROM_CLOSE, HANDLE_FLAG_PROTECT_FROM_CLOSE);
+		SetHandleInformation( m_hChildStdInRead, HANDLE_FLAG_PROTECT_FROM_CLOSE, HANDLE_FLAG_PROTECT_FROM_CLOSE);
 	}
 
-	if (hChildStdOutRead != INVALID_HANDLE_VALUE &&
-		hChildStdOutWrite!= INVALID_HANDLE_VALUE &&
-		hChildStdInRead  != INVALID_HANDLE_VALUE &&
-		hChildStdInWrite != INVALID_HANDLE_VALUE)
+	if (m_hChildStdOutRead != INVALID_HANDLE_VALUE &&
+		m_hChildStdOutWrite!= INVALID_HANDLE_VALUE &&
+		m_hChildStdInRead  != INVALID_HANDLE_VALUE &&
+		m_hChildStdInWrite != INVALID_HANDLE_VALUE)
 	{
 		char szCmdline[BUFFER_SIZE];
 		sprintf_s(szCmdline, 
 				BUFFER_SIZE, 
 				"C:/Documents and Settings/All Users/Application Data/Skype/Plugins/Plugins/%s/xtrshost.exe %s", 
 				m_id.c_str(), 
-#ifdef _DEBUG
+#ifdef _DEBUG_CLIENT
 				"DEBUG"
 #else
 				m_id.c_str()
 #endif
 			);
 
-		if(!m_processManager->CreateChildProcess(hChildStdOutWrite, hChildStdInRead, szCmdline))
+		if(!m_processManager->CreateChildProcess(m_hChildStdOutWrite, m_hChildStdInRead, szCmdline))
 		{
 			Cleanup();
 		}
@@ -70,24 +69,26 @@ AnonymousPipe::~AnonymousPipe()
 	Cleanup();
 }
 
-void AnonymousPipe::SafeCloseHandle(HANDLE* handle)
+void AnonymousPipe::SafeCloseHandle(HANDLE* Handle)
 {
-	if (*handle)
+	assert(Handle != NULL);
+
+	if (*Handle)
 	{
-		if (SetHandleInformation( *handle, HANDLE_FLAG_PROTECT_FROM_CLOSE, 0))
+		if (SetHandleInformation( *Handle, HANDLE_FLAG_PROTECT_FROM_CLOSE, 0))
 		{
-			CloseHandle(*handle);
+			CloseHandle(*Handle);
 		}
-		*handle = NULL;
+		*Handle = NULL;
 	}
 }
 
 void AnonymousPipe::Cleanup()
 {
-	SafeCloseHandle(&hChildStdOutRead);
-	SafeCloseHandle(&hChildStdOutWrite);
-	SafeCloseHandle(&hChildStdInRead);
-	SafeCloseHandle(&hChildStdInWrite);
+	SafeCloseHandle(&m_hChildStdOutRead);
+	SafeCloseHandle(&m_hChildStdOutWrite);
+	SafeCloseHandle(&m_hChildStdInRead);
+	SafeCloseHandle(&m_hChildStdInWrite);
 
 	if (m_processManager)
 		m_processManager->TerminateChildProcess();
@@ -95,7 +96,7 @@ void AnonymousPipe::Cleanup()
 
 long AnonymousPipe::ResponseSize()
 {
-	if (hChildStdOutRead)
+	if (m_hChildStdOutRead)
 	{
 		DWORD dwRead = 0;
 		
@@ -104,7 +105,7 @@ long AnonymousPipe::ResponseSize()
 
 		DWORD dwBytes;
 
-		if (PeekNamedPipe(hChildStdOutRead, buffer, BUFFER_SIZE, &dwRead, &dwBytes, NULL))
+		if (PeekNamedPipe(m_hChildStdOutRead, buffer, BUFFER_SIZE, &dwRead, &dwBytes, NULL))
 			if (dwBytes > 0)
 		{
 			char* c = buffer;
@@ -121,39 +122,39 @@ long AnonymousPipe::ResponseSize()
 	return 0;
 }
 	
-long AnonymousPipe::Read(_bstr_t& buf, long responseSize)
+long AnonymousPipe::Read(std::string& Buffer, long ResponseSize)
 {
-	if (hChildStdOutRead)
+	if (m_hChildStdOutRead)
 	{
 		DWORD dwRead = 0;
 		
 		char buffer[BUFFER_SIZE];
 		ZeroMemory(buffer, BUFFER_SIZE);
 
-		if (ReadFile(hChildStdOutRead, 
+		if (ReadFile(m_hChildStdOutRead, 
 				buffer, 
-				responseSize < BUFFER_SIZE ? responseSize : BUFFER_SIZE, 
+				ResponseSize < BUFFER_SIZE ? ResponseSize : BUFFER_SIZE, 
 				&dwRead, 
 				NULL)
 			)
 		{	
-			return Protocol::ExtractMessageID(buffer, buf);
+			return Protocol::ExtractMessageID(buffer, Buffer);
 		}
 
 	}
 	return Protocol::INVALID_ID;
 }
 
-void AnonymousPipe::Write(_bstr_t& payload)
+void AnonymousPipe::Write(std::string& Payload)
 {
-	if(hChildStdOutWrite)
+	if(m_hChildStdOutWrite)
 	{
 		char buffer[BUFFER_SIZE];	
-		int len = Protocol::EncodeMessage(buffer, payload);
+		int len = Protocol::EncodeMessage(buffer, Payload);
 		if (len > 0)
 		{
 			DWORD dwWritten = 0;
-			if (!WriteFile(hChildStdInWrite, buffer, len, &dwWritten, NULL))
+			if (!WriteFile(m_hChildStdInWrite, buffer, len, &dwWritten, NULL))
 			{
 				Cleanup();			
 			}

@@ -10,11 +10,11 @@ class BSTRHelper
 {
 public:
 	BSTRHelper();
-	BSTRHelper(_bstr_t& bstr);
-	BSTRHelper(wchar_t* bstr);
+	BSTRHelper(_bstr_t& BStr);
+	BSTRHelper(wchar_t* BStr);
 	~BSTRHelper();
 
-	static void CharToBSTR(const char* c, _bstr_t& buf);
+	static void CharToBSTR(const char* CharArray, _bstr_t& Buffer);
 
 	const char* c_str() const { return m_str; }
 	const int Length() const { return m_str ? sizeof *m_str : 0; }

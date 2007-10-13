@@ -79,7 +79,7 @@ namespace Skype.Extension.Utils.PluginB.Host
                             break;
                         }
                     }
-                    System.Threading.Thread.Sleep(1000);//msec
+                    System.Threading.Thread.Sleep(10);//msec
                 }
                 while (bytesRead > 0 && !program.IsTerminated);
             }

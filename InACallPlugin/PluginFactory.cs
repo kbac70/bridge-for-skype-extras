@@ -29,6 +29,7 @@ namespace InACall.Plugin
             return new InACallPluginImpl(
                     factory,
                     AbstractPluginImpl.ExtractPictureFromResourcesToFile(
+                            System.Reflection.Assembly.GetAssembly(typeof(InACallPluginImpl)),
                             INACALL_NS,
                             ICON_FILENAME,
                             RES_ICON_FILENAME

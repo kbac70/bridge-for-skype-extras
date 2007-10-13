@@ -9,7 +9,7 @@ DotNetCheck::DotNetCheck(void)
 	ZeroMemory(buffer, DN_BUFFER_SIZE);
 	if (GetWindowsDirectory(buffer, DN_BUFFER_SIZE))
 	{
-		this->windowsDir = buffer;
+		this->m_windowsDir = buffer;
 	}
 }
 
@@ -19,13 +19,13 @@ DotNetCheck::~DotNetCheck(void)
 
 bool DotNetCheck::IsInstalled()
 {
-	if (windowsDir.length() == 0)
+	if (m_windowsDir.length() == 0)
 		return false;
 
 	const std::string netDir = "\\Microsoft.NET\\Framework\\*";
 	const std::string versionDir = "v";
 
-	std::string frameworkDir = windowsDir;
+	std::string frameworkDir = m_windowsDir;
 	frameworkDir.append(netDir);
 
 	WIN32_FIND_DATA findFileData;	

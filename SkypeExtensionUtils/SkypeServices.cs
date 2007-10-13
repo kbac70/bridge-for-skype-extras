@@ -7,13 +7,16 @@ using SKYPE4COMLib;
 namespace Skype.Extension.Utils
 {
     using SKYPE4COMLib;
+    using System.Runtime.InteropServices;
+
+    using HANDLE = System.IntPtr;
 
     /// <summary>
     /// Thin wrapper class to improve testability of the project 
     /// by avoiding coupling to the Skype co-class. Pass mocks to
     /// the c-tor to enjoy TDD ;)
     /// </summary>
-    public sealed class SkypeServices
+    public class SkypeServices
     {
         private readonly ISkype skype;
         private readonly _ISkypeEvents_Event events;
@@ -43,5 +46,16 @@ namespace Skype.Extension.Utils
                 return this.events;
             }
         }
+
+        public static bool IsSkypeRunning
+        {
+            get
+            {
+                return FindWindow("tSkMainForm.UnicodeClass", null).ToInt64() > 0;
+            }
+        }
+
+        [DllImport("user32.dll")]
+        private static extern HANDLE FindWindow(string lpClassName, string lpWindowName);
     }
 }

@@ -81,7 +81,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ptrustm.lib comsuppw.lib Shell32.Lib"
+				AdditionalDependencies="ptrustm.lib comsuppw.lib Shell32.Lib Psapi.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)/xtrsbrdg.dll"
 				Version=""
@@ -158,7 +158,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;C:\Program Files\Microsoft Platform SDK\Include&quot;"
-				PreprocessorDefinitions="_DEBUG;WIN32;_WINDOWS;_USRDLL"
+				PreprocessorDefinitions="_DEBUG;WIN32;_WINDOWS;_USRDLL;"
 				MinimalRebuild="false"
 				ExceptionHandling="2"
 				BasicRuntimeChecks="0"
@@ -190,7 +190,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="false"
 				AdditionalOptions="&#x0D;&#x0A;"
-				AdditionalDependencies="ptrustm.lib comsuppw.lib Shell32.Lib"
+				AdditionalDependencies="ptrustm.lib comsuppw.lib Shell32.Lib Psapi.lib"
 				OutputFile="$(OutDir)/xtrsbrdg.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -269,6 +269,10 @@
 			</File>
 			<File
 				RelativePath=".\DotNetCheck.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\EnumProc.cpp"
 				>
 			</File>
 			<File
@@ -360,6 +364,10 @@
 			</File>
 			<File
 				RelativePath=".\DotNetCheck.h"
+				>
+			</File>
+			<File
+				RelativePath=".\EnumProc.h"
 				>
 			</File>
 			<File

@@ -1,6 +1,6 @@
 #pragma once
 
-class _bstr_t;
+#include <string>
 
 #define BUFFER_SIZE 4096
 
@@ -24,7 +24,7 @@ public:
 	//
 	/////////////////////////////////////////////////////////	
 	static int EncodeMessage(char* Buffer, 
-			_bstr_t& Payload			//<payload><sep><eol>
+			std::string& Payload		//<payload><sep><eol>
 		);	
 	static int EncodeOpenRequest(char* Buffer, 
 			const char* PluginID,		//<pluginID><sep>	
@@ -45,6 +45,14 @@ public:
 			const long ID,				//<msgID><sep>
 			const char*Payload			//<payload>
 			);
+	static int EncodeResponseThreadAborted(char* Buffer,
+			const long ID,				//<msgID><sep>
+			const char*Payload			//<payload>
+			);
+	static int EncodeResponseTimeout(char* Buffer,
+			const long ID,				//<msgID><sep>
+			const char*Payload			//<payload>
+			);
 	/////////////////////////////////////////////////////////
 	//RESPONSE Format:
 	//
@@ -52,9 +60,9 @@ public:
 	//
 	/////////////////////////////////////////////////////////
 	static long ExtractMessageID(char* Buffer, 
-			_bstr_t& Payload			//<msgID><sep><payload><eol>
+			std::string& Payload		//<msgID><sep><payload><eol>
 		);
-	static long ExtractHResult(_bstr_t& Payload);
+	static long ExtractHResult(std::string& Payload);
 
 public:
 	Protocol(void);

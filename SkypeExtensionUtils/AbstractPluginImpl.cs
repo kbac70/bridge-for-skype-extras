@@ -18,8 +18,6 @@ namespace Skype.Extension.Utils
     /// </summary>
     public abstract class AbstractPluginImpl
     {
-        private bool HasEvents;
-
         protected readonly SkypeServices services;
 
         protected readonly Dictionary<string, IPluginMenuItem> customMenus;
@@ -32,30 +30,35 @@ namespace Skype.Extension.Utils
         /// your assembly's directory. Skype requires access to the file containing a 
         /// pictogram to be displayed on the menu of the plugin
         /// </summary>
+        /// <param name="assembly">The assembly which the resource is embedded in</param>
         /// <param name="nameSpaceName">The namespace within which the file resource has been defined</param>
         /// <param name="pictureFileName">The desired file name</param>
         /// <param name="resourceName">The name of the resource</param>
         /// <returns>Full file name with drive and directory information</returns>
-        public static string ExtractPictureFromResourcesToFile(string nameSpaceName, 
-                string pictureFileName, string resourceName)
+        public static string ExtractPictureFromResourcesToFile(Assembly assembly, 
+                string nameSpaceName,  string pictureFileName, string resourceName)
         {
             Contract.EnsureArgumentNotNull(nameSpaceName, "nameSpaceName");
             Contract.EnsureArgumentNotNull(pictureFileName, "pictureFileName");
             Contract.EnsureArgumentNotNull(resourceName, "resourceName");
 
-            //extract icon if not exists
-            Assembly thisAssembly = System.Reflection.Assembly.GetCallingAssembly();
-            FileInfo fi = new FileInfo(thisAssembly.Location);
+            FileInfo fi = new FileInfo(assembly.Location);
             fi = new FileInfo(fi.DirectoryName + Path.DirectorySeparatorChar + pictureFileName);
 
             if (!fi.Exists)
             {
                 try
                 {
-                    string[] r = thisAssembly.GetManifestResourceNames();
-                    System.IO.Stream fromStream = thisAssembly.GetManifestResourceStream(
+                    string[] r = assembly.GetManifestResourceNames();
+                    System.IO.Stream fromStream = assembly.GetManifestResourceStream(
                             nameSpaceName + ".Resources." + resourceName);
+                    if (fromStream == null)
+                    {
+                        throw new FileLoadException(nameSpaceName + ".Resources." + resourceName);
+                    }
+
                     FileStream toStream = File.Create(fi.FullName);
+
                     BinaryReader br = new BinaryReader(fromStream);
                     BinaryWriter bw = new BinaryWriter(toStream);
                     try
@@ -71,10 +74,8 @@ namespace Skype.Extension.Utils
 
                     fi.Refresh();
                 }
-                catch (Exception e)
+                finally
                 {
-                    AbstractPluginImpl.HandleException(e);
-
                     fi.Refresh();
                     if (fi.Exists)
                     {
@@ -84,6 +85,24 @@ namespace Skype.Extension.Utils
             }
 
             return fi.FullName;
+        }
+
+        /// <summary>
+        /// Call this utitlity to extract picture resource into a file within 
+        /// your assembly's directory. Skype requires access to the file containing a 
+        /// pictogram to be displayed on the menu of the plugin.
+        /// NB: It that the calling assembly hosts the resource!
+        /// </summary>
+        /// <param name="nameSpaceName">The namespace within which the file resource has been defined</param>
+        /// <param name="pictureFileName">The desired file name</param>
+        /// <param name="resourceName">The name of the resource</param>
+        /// <returns>Full file name with drive and directory information</returns>
+        public static string ExtractPictureFromResourcesToFile(string nameSpaceName, 
+                string pictureFileName, string resourceName)
+        {
+            //extract icon if not exists
+            Assembly assembly = System.Reflection.Assembly.GetCallingAssembly();
+            return ExtractPictureFromResourcesToFile(assembly, nameSpaceName, pictureFileName, resourceName);
         }
 
 
@@ -99,8 +118,6 @@ namespace Skype.Extension.Utils
             services.Events.UserStatus += this.OnSkypeUserStatusChanged;
             services.Events.PluginEventClicked += this.OnSkypeEventClicked;
             services.Events.PluginMenuItemClicked += this.OnSkypeMenuItemClicked;
-
-            HasEvents = true;
         }
 
 
@@ -191,14 +208,7 @@ namespace Skype.Extension.Utils
         {
             if (customEvents.ContainsKey(evnt.Id))
             {
-                try
-                {
-                    OnSafeSkypeEventItemClicked(evnt);
-                }
-                catch (Exception e)
-                {
-                    HandleException(e);
-                }
+                OnSafeSkypeEventItemClicked(evnt);
             }
         }
 
@@ -215,15 +225,7 @@ namespace Skype.Extension.Utils
         {
             if (customMenus.ContainsKey(pmi.Id))
             {
-                try
-                {
-                    OnSafeSkypeMenuItemClicked(pmi, users, pluginContext, contextId);
-                }
-                catch (Exception e)
-                {
-                    HandleException(e);
-                }
-
+                OnSafeSkypeMenuItemClicked(pmi, users, pluginContext, contextId);
             }
         }
 
@@ -240,14 +242,6 @@ namespace Skype.Extension.Utils
                 IUserCollection users, TPluginContext pluginContext, String contextId);
 
 
-        public static void HandleException(Exception e)
-        {
-            Contract.EnsureArgumentNotNull(e, "e");
-
-            MessageBox.Show(e.Message, "Error Occured",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
         private void OnSkypeUserStatusChanged(TUserStatus status)
         {
             if (status == TUserStatus.cusLoggedOut)
@@ -255,10 +249,6 @@ namespace Skype.Extension.Utils
                 try
                 {
                     this.AfterUserLoggedOut();  
-                }
-                catch (Exception e)
-                {
-                    HandleException(e);
                 }
                 finally
                 {
@@ -274,7 +264,7 @@ namespace Skype.Extension.Utils
                 bool isRunning = false;
                 try
                 {
-                    isRunning = this.services.Skype.Client.IsRunning;
+                    isRunning = SkypeServices.IsSkypeRunning && this.services.Skype.Client.IsRunning;
                 }
                 catch (Exception) //COM failure
                 {
@@ -287,14 +277,10 @@ namespace Skype.Extension.Utils
         {
             if (IsSkypeRunning)
             {
-                if (HasEvents)
-                {
-                    services.Events.UserStatus -= this.OnSkypeUserStatusChanged;
-                    services.Events.PluginEventClicked -= this.OnSkypeEventClicked;
-                    services.Events.PluginMenuItemClicked -= this.OnSkypeMenuItemClicked;
 
-                    HasEvents = false;
-                }
+                //services.Events.UserStatus -= this.OnSkypeUserStatusChanged;
+                //services.Events.PluginEventClicked -= this.OnSkypeEventClicked;
+                //services.Events.PluginMenuItemClicked -= this.OnSkypeMenuItemClicked;
 
                 while (customMenus.Count > 0)
                 {

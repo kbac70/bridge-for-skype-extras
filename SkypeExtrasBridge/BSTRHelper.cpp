@@ -24,6 +24,8 @@ BSTRHelper::~BSTRHelper()
 
 void BSTRHelper::CharToBSTR(const char* c, _bstr_t& buf)
 {
+	assert(c != NULL);
+
 	BSTR bstr = _com_util::ConvertStringToBSTR(c);
 	buf.Assign(bstr);
 	SysFreeString(bstr);

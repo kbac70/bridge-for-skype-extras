@@ -1,9 +1,8 @@
 #pragma once
 
-class _bstr_t;
 class PipePumpingThread;
-class BSTRHelper;
 
+#include <string>
 #include "ISkypePluginB.h"
 
 /**
@@ -13,14 +12,14 @@ class BSTRHelper;
 class SkypeBridge
 {
 public:
-	SkypeBridge(_bstr_t& PluginID);
+	SkypeBridge(const char* PluginID);
 	~SkypeBridge();
 	
 	void Open(POPEN_CONTEXT Context);
 	void ShowSettingsDlg(unsigned int WndOwner);
 	void Shutdown();
 private:
-	BSTRHelper* m_id;
+	std::string m_id;
 	PipePumpingThread* m_thread;
 };
 

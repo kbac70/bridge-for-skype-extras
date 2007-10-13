@@ -2,7 +2,11 @@
 #include "CSkypePluginB.h"
 #include "ICollectionManager.h"
 #include "comutil.h"
+#include "BSTRHelper.h"
 #include "SkypeBridge.h"
+
+//singleton
+CSkypePluginB* g_plugin;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -11,11 +15,15 @@ CSkypePluginB::CSkypePluginB(_bstr_t& ItemID, ICollectionManager* ColManager,
 			 _bstr_t& Params, bool shouldCallAddRef)
 	: m_manager (ColManager), m_id(ItemID), m_plugin(NULL), m_params(Params)
 {
+	assert(ColManager != NULL);
+
 	if (shouldCallAddRef)
 	{
 		this->AddRef();
-		m_plugin = new SkypeBridge(m_id);
 	}
+	BSTRHelper id = BSTRHelper(ItemID);
+	m_plugin = new SkypeBridge(id.c_str());
+	g_plugin = this;
 }
 
 CSkypePluginB::~CSkypePluginB()
@@ -23,8 +31,12 @@ CSkypePluginB::~CSkypePluginB()
 	if (m_plugin)
 		delete m_plugin;
 
-	m_manager->PluginClosed(m_id.GetBSTR());
-	m_manager = NULL;
+	if (m_manager)
+	{
+		m_manager->PluginClosed(m_id.GetBSTR());
+		m_manager = NULL;
+	}
+	g_plugin = NULL;
 }
 
 STDMETHODIMP CSkypePluginB::QueryInterface(REFIID riid,LPVOID *ppv)
@@ -60,10 +72,16 @@ STDMETHODIMP CSkypePluginB::ShowSettingsDlg(OLE_HANDLE WndOwner)
 
 STDMETHODIMP CSkypePluginB::Finalize()
 {
+	Shutdown();
+	this->Release();
+	return S_OK;
+}
+
+
+void CSkypePluginB::Shutdown()
+{
 	if (m_plugin)
 	{
 		m_plugin->Shutdown();
 	}
-	this->Release();
-	return S_OK;
 }
