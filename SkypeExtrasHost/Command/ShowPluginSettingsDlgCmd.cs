@@ -5,7 +5,7 @@ using System.Text;
 namespace Skype.Extension.Utils.PluginB.Host.Command
 {
     /// <summary>
-    /// Author: KBac
+    /// Author: KBac 
     /// </summary>
     class ShowPluginSettingsDlgCmd : AbstractCommand
     {

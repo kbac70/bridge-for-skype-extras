@@ -9,7 +9,7 @@ namespace Skype.Extension.Utils.PluginB.Host
     using System.Diagnostics;
 
     /// <summary>
-    /// Author: KBac
+    /// Author: KBac 
     /// </summary>
     class ProgramContext : ApplicationContext
     {

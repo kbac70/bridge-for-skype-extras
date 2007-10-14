@@ -7,7 +7,7 @@ namespace Skype.Extension.Utils.PluginB.Host
     using Skype.Extension.Utils;
 
     /// <summary>
-    /// Author: KBac
+    /// Author: KBac 
     /// </summary>
     class PluginLoader
     {

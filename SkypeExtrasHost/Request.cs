@@ -8,7 +8,7 @@ namespace Skype.Extension.Utils.PluginB.Host
     using System.Collections.Generic;
 
     /// <summary>
-    /// Author: KBac
+    /// Author: KBac 
     /// </summary>
     class RequestParams
     {

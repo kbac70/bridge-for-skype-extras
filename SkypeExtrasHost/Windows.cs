@@ -13,7 +13,7 @@ namespace Skype.Extension.Utils.PluginB.Host
     using DWORD = System.UInt32;
 
     /// <summary>
-    /// Author: KBac
+    /// Author: KBac 
     /// </summary>
     class Windows
     {

@@ -11,7 +11,7 @@ namespace Skype.Extension.Utils.PluginB.Host
     using Microsoft.Win32.SafeHandles;
 
     /// <summary>
-    /// Author: KBac
+    /// Author: KBac 
     /// </summary>
     class PipeListenerThread
     {
