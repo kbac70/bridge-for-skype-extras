@@ -1,6 +1,0 @@
-;myServ.def : Declares the module parameters for the DLL.
-
-LIBRARY      xtrsbrdg.dll
-
-EXPORTS
-    DllInitSkypePluginB		PRIVATE;
