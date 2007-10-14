@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root s="InACall Plugin">
+  <names>
+    <i0 s="friendly_name"/>
+    <i1 s="description"/>
+    <i2 s="menu_tools"/>
+    <i3 s="menu_context"/>
+    <i4 s="menu_profile"/>
+    <i5 s="event_text"/>
+  </names>
+  <languages>
+    <ENU>
+      <i0 s="InACall Indicator"/>
+      <i1 s="Automatically changes mood or status to indicate you are in a call"/>
+      <i2 s=""/>
+      <i3 s=""/>
+      <i4 s=""/>
+      <i5 s=""/>
+    </ENU>
+    <ESP>
+      <i0 s="InACall indicar"/>
+      <i1 s="Cambia automáticamente humor o el estado para indicarle está en una llamada"/>
+      <i2 s=""/>
+      <i3 s=""/>
+      <i4 s=""/>
+      <i5 s=""/>
+    </ESP>
+    <PLK>
+      <i0 s="Indykator W Trakcie Rozmowy"/>
+      <i1 s="Automatycznie zmienia opis nastroju lub status gdy jesteś w trakcie rozmowy"/>
+      <i2 s=""/>
+      <i3 s=""/>
+      <i4 s=""/>
+      <i5 s=""/>
+    </PLK>
+  </languages>
+</root>

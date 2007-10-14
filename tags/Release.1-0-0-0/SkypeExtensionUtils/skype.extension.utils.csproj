@@ -1,0 +1,125 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A99C62C2-5B6D-4F5B-B907-3D07AB3C1B16}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Skype.Extension.Utils</RootNamespace>
+    <AssemblyName>Extras.Utils</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RegisterForComInterop>false</RegisterForComInterop>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RegisterForComInterop>false</RegisterForComInterop>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AbstractPluginImpl.cs" />
+    <Compile Include="Contract.cs" />
+    <Compile Include="Globalization.cs" />
+    <Compile Include="IHostUIServices.cs" />
+    <Compile Include="InviteContext.cs" />
+    <Compile Include="IOutgoingInvitationClient.cs" />
+    <Compile Include="IPluginFactory.cs" />
+    <Compile Include="ISkypePluginA.cs" />
+    <Compile Include="ISkypePluginB.cs" />
+    <Compile Include="OpenContext.cs" />
+    <Compile Include="ProcessHelper.cs" />
+    <Compile Include="SkypePluginAContext.cs" />
+    <Compile Include="PluginEventDecorator.cs" />
+    <Compile Include="PluginMenuItemDecorator.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResFinder.cs" />
+    <Compile Include="UserStatusResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserStatusResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SkypeServices.cs" />
+    <Compile Include="UserStatusSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserStatusSelector.Designer.cs">
+      <DependentUpon>UserStatusSelector.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="SKYPE4COMLib">
+      <Guid>{03282B5D-B38F-469D-849A-09B0A7F4881B}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="UserStatusSelector.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>UserStatusSelector.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\awaySmall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\dndSmall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\invisibleSmall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\loggedoutSmall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\naSmall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\onlineSmall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\skypemeSmall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\unknownSmall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="UserStatusSelector.bmp" />
+    <EmbeddedResource Include="UserStatusResources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>UserStatusResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
