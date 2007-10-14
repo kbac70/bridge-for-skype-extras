@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Skype.Extension.Utils.PluginB.Host
 {
+    /// <summary>
+    /// Author: KBac
+    /// </summary>
     abstract class AbstractCommand
     {
         protected readonly Factory factory;

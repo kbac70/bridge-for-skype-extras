@@ -12,6 +12,9 @@ namespace Skype.Extension.Utils.PluginB.Host
     using HANDLE = System.IntPtr;
     using DWORD = System.UInt32;
 
+    /// <summary>
+    /// Author: KBac
+    /// </summary>
     class Windows
     {
         public const DWORD STD_INPUT_HANDLE = unchecked((UInt32)(-10));

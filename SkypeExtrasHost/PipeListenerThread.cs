@@ -9,7 +9,10 @@ namespace Skype.Extension.Utils.PluginB.Host
     using System.Runtime.InteropServices;
     using System.IO;
     using Microsoft.Win32.SafeHandles;
- 
+
+    /// <summary>
+    /// Author: KBac
+    /// </summary>
     class PipeListenerThread
     {
         private const int MAX_BUFFER_SIZE = 4096;

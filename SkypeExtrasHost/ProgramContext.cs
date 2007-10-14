@@ -8,6 +8,9 @@ namespace Skype.Extension.Utils.PluginB.Host
     using System.Threading;
     using System.Diagnostics;
 
+    /// <summary>
+    /// Author: KBac
+    /// </summary>
     class ProgramContext : ApplicationContext
     {
         private readonly bool isDebugging;

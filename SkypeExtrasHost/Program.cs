@@ -9,6 +9,7 @@ namespace Skype.Extension.Utils.PluginB.Host
     {
         /// <summary>
         /// The main entry point for the application.
+        /// Author: KBac
         /// </summary>
         [STAThread]
         public static void Main(string[] args)

@@ -6,6 +6,9 @@ namespace Skype.Extension.Utils.PluginB.Host
 {
     using Skype.Extension.Utils.PluginB.Host.Command;
 
+    /// <summary>
+    /// Author: KBac
+    /// </summary>
     class Factory
     {
         private readonly PluginLoader loader;

@@ -6,6 +6,9 @@ namespace Skype.Extension.Utils.PluginB.Host
 {
     using Skype.Extension.Utils;
 
+    /// <summary>
+    /// Author: KBac
+    /// </summary>
     class PluginLoader
     {
         const string DLL_XTRS = "xtrsbrdg.dll";

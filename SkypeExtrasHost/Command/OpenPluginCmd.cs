@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Skype.Extension.Utils.PluginB.Host.Command
 {
+    /// <summary>
+    /// Author: KBac
+    /// </summary>
     class OpenPluginCmd : AbstractCommand
     {
         public OpenPluginCmd(Factory factory)
