@@ -14,6 +14,8 @@ namespace InACall.Impl
 
         protected readonly SkypeServices services;
 
+        protected string userDisplayName;
+
         private IInACallSettings disenagagedSettings;
 
         private bool isEngaged;
@@ -35,7 +37,8 @@ namespace InACall.Impl
             this.services.Events.UserStatus += this.OnSkypeUserStatusChanged;
             this.services.Events.OnlineStatus += this.OnSkypeOnlineStatusChanged;
 
-            IUser user = this.services.Skype.CurrentUser;
+            IUser user = this.services.Skype.CurrentUser.DisplayName;
+            this.userDisplayName = user.DisplayName;
             this.disenagagedSettings.MoodText = user != null ? user.RichMoodText : "";
             this.services.Events.UserMood += this.OnSkypeUserMoodChanged;
 
@@ -92,7 +95,7 @@ namespace InACall.Impl
 
         private bool isCurrentUser(User user)
         {
-            return user.DisplayName.Equals(this.services.Skype.CurrentUser.DisplayName);
+            return user.DisplayName.Equals(userDisplayName);
         }
 
         private void OnSkypeUserStatusChanged(TUserStatus status)
