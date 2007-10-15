@@ -53,28 +53,52 @@ STDMETHODIMP CSkypePluginB::QueryInterface(REFIID riid,LPVOID *ppv)
 
 STDMETHODIMP CSkypePluginB::Open(POPEN_CONTEXT OpenContext)
 {
-	if (m_plugin)
+	try
 	{
-		m_plugin->Open(OpenContext);
+		if (m_plugin)
+		{
+			m_plugin->Open(OpenContext);
+		}
+
+		return S_OK;
 	}
-	return S_OK;
+	catch(...)
+	{
+		return E_UNEXPECTED;
+	}
 }
 
 STDMETHODIMP CSkypePluginB::ShowSettingsDlg(OLE_HANDLE WndOwner)
 {
-	if (m_plugin)
+	try
 	{
-		m_plugin->ShowSettingsDlg(WndOwner);
+		if (m_plugin)
+		{
+			m_plugin->ShowSettingsDlg(WndOwner);
+		}
+
+		return S_OK;
 	}
-	return S_OK;
+	catch(...)
+	{
+		return E_UNEXPECTED;
+	}
 }
 
 
 STDMETHODIMP CSkypePluginB::Finalize()
 {
-	Shutdown();
-	this->Release();
-	return S_OK;
+	try
+	{
+		Shutdown();
+		this->Release();
+
+		return S_OK;
+	}
+	catch(...)
+	{
+		return E_UNEXPECTED;
+	}
 }
 
 
