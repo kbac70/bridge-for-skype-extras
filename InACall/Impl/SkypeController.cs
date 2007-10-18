@@ -37,7 +37,7 @@ namespace InACall.Impl
             this.services.Events.UserStatus += this.OnSkypeUserStatusChanged;
             this.services.Events.OnlineStatus += this.OnSkypeOnlineStatusChanged;
 
-            IUser user = this.services.Skype.CurrentUser.DisplayName;
+            IUser user = this.services.Skype.CurrentUser;
             this.userDisplayName = user.DisplayName;
             this.disenagagedSettings.MoodText = user != null ? user.RichMoodText : "";
             this.services.Events.UserMood += this.OnSkypeUserMoodChanged;
