@@ -6,9 +6,8 @@
 #include "DotNetCheck.h"
 
 SkypeBridge::SkypeBridge(const char* PluginID)
-: m_id(PluginID)
+: m_id(PluginID), m_thread(NULL)
 {
-	m_thread = new PipePumpingThread(m_id);
 }
 
 SkypeBridge::~SkypeBridge()
@@ -16,15 +15,31 @@ SkypeBridge::~SkypeBridge()
 	delete m_thread;
 }
 
+bool SkypeBridge::IsDotNetAvailable()
+{
+	DotNetCheck dotNet;
+	const bool isDotNetInstalled = dotNet.CheckIsInstalled();
+	
+	if(isDotNetInstalled)
+	{
+		if (!m_thread)
+			m_thread = new PipePumpingThread(m_id);
+	}
+	else
+	{
+		delete m_thread;
+		m_thread = NULL;
+	}
+
+	return isDotNetInstalled;
+}
+
 void SkypeBridge::Open(POPEN_CONTEXT Context)
 {
 	assert(Context != NULL);
 
-	if (Context->ContextType == ctNone)
-	{
-		DotNetCheck dotNet;
-		dotNet.CheckIsInstalled();
-	}
+	if (!IsDotNetAvailable())
+		return;
 
 	char buffer[BUFFER_SIZE];
 	BSTRHelper Participants = BSTRHelper(Context->Participants);
@@ -50,6 +65,9 @@ void SkypeBridge::Open(POPEN_CONTEXT Context)
 
 void SkypeBridge::ShowSettingsDlg(unsigned int WndOwner)
 {
+	if (!IsDotNetAvailable())
+		return;
+
 	char buffer[BUFFER_SIZE];
 	int len = Protocol::EncodeShowSettingsDlg(buffer, m_id.c_str(), WndOwner);
 
@@ -62,12 +80,15 @@ void SkypeBridge::ShowSettingsDlg(unsigned int WndOwner)
 
 void SkypeBridge::Shutdown()
 {
-	char buffer[BUFFER_SIZE];
-	int len = Protocol::EncodeShutdown(buffer, m_id.c_str());
-
-	if(len > 0)
+	if (m_thread)
 	{
-		std::string payload(buffer);
-		m_thread->SyncWriteRequest(payload);
+		char buffer[BUFFER_SIZE];
+		int len = Protocol::EncodeShutdown(buffer, m_id.c_str());
+
+		if(len > 0)
+		{
+			std::string payload(buffer);
+			m_thread->SyncWriteRequest(payload);
+		}
 	}
 }

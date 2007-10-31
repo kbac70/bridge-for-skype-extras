@@ -65,10 +65,10 @@ public:
 private:
 	static long msgID;
 	volatile bool m_terminated;
-	bool isSuspended;
+	bool m_IsSuspended;
 
-	DWORD dwThreadID;
-	HANDLE  hThread;
+	DWORD m_dwThreadID;
+	HANDLE  m_hThread;
 	std::string m_id;
 
 	std::string m_abortRequest;

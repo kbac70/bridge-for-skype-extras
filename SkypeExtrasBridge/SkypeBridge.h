@@ -21,5 +21,6 @@ public:
 private:
 	std::string m_id;
 	PipePumpingThread* m_thread;
+	bool IsDotNetAvailable();
 };
 

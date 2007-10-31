@@ -54,10 +54,10 @@ DWORD PipeManagingThread( LPVOID* pArguments )
 
 
 PipePumpingThread::PipePumpingThread(std::string& id)
-: hThread(NULL), m_terminated(false), dwThreadID(0), m_id(id), isSuspended(true)
+: m_hThread(NULL), m_terminated(false), m_dwThreadID(0), m_id(id), m_IsSuspended(true)
 {
-	hThread = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)PipeManagingThread,
-		(LPVOID)this, BELOW_NORMAL_PRIORITY_CLASS | CREATE_SUSPENDED, &dwThreadID);
+	m_hThread = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)PipeManagingThread,
+		(LPVOID)this, BELOW_NORMAL_PRIORITY_CLASS | CREATE_SUSPENDED, &m_dwThreadID);
 
 	char shutdown[BUFFER_SIZE];
 	Protocol::EncodeShutdown(shutdown, m_id.c_str());
@@ -70,11 +70,11 @@ PipePumpingThread::~PipePumpingThread()
 {
 	m_terminated = true;
 
-	if (hThread)
+	if (m_hThread)
 	{
 		Resume();
-		WaitForSingleObject(hThread, 3 * PROCESS_TERMINATION_ALLOWANCE);
-		CloseHandle(hThread);
+		WaitForSingleObject(m_hThread, 3 * PROCESS_TERMINATION_ALLOWANCE);
+		CloseHandle(m_hThread);
 	}
 }
 
@@ -87,8 +87,8 @@ std::string& PipePumpingThread::Abort()
 
 void PipePumpingThread::Resume()
 {
-	if (isSuspended) 
-		ResumeThread(hThread);
+	if (m_IsSuspended) 
+		ResumeThread(m_hThread);
 }
 
 long PipePumpingThread::WriteRequest(const std::string& Payload)

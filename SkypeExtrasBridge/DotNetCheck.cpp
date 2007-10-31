@@ -11,40 +11,47 @@ DotNetCheck::DotNetCheck(void)
 	{
 		this->m_windowsDir = buffer;
 	}
+
+	m_dotnetDir = m_windowsDir;
+	m_dotnetDir.append(DOTNET_DIR);
 }
 
 DotNetCheck::~DotNetCheck(void)
 {
 }
 
+const std::string DotNetCheck::DOTNET_DIR = "\\Microsoft.NET\\Framework\\";
+
+
 bool DotNetCheck::IsInstalled()
 {
 	if (m_windowsDir.length() == 0)
 		return false;
 
-	const std::string netDir = "\\Microsoft.NET\\Framework\\*";
 	const std::string versionDir = "v";
 
-	std::string frameworkDir = m_windowsDir;
-	frameworkDir.append(netDir);
+	std::string frameworkDir(m_dotnetDir);
+	frameworkDir.append("*");
 
 	WIN32_FIND_DATA findFileData;	
 	HANDLE hFind = FindFirstFile(frameworkDir.c_str(), &findFileData);
 	
 	if (hFind == INVALID_HANDLE_VALUE) 
+	{
 		return false;
+	}
 
 	bool ret = false;
-	// List all the files in the directory.
+	// List all the files and directories in the .NET framework directory.
     while (FindNextFile(hFind, &findFileData) != 0) 
     {
-		if (findFileData.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY)
+		if (findFileData.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY &&
+			findFileData.cFileName && findFileData.cFileName[0] == 'v' &&
+			ContainsSystemDll(findFileData.cFileName)
+		    )
 		{
-			if (findFileData.cFileName && findFileData.cFileName[0] == 'v')
-			{
-				ret = true;
-				break;
-			}
+			ret = true;
+			break;
 		}
 	}
     
@@ -52,10 +59,32 @@ bool DotNetCheck::IsInstalled()
 	return ret;
 }
 
-void DotNetCheck::CheckIsInstalled()
+bool DotNetCheck::ContainsSystemDll(const char* const lpszDirName) const 
+{
+	assert(lpszDirName);
+
+	static const std::string SystemDll = "\\System.dll";
+	
+	std::string SystemFileName(m_dotnetDir);
+	SystemFileName.append(lpszDirName);
+	SystemFileName.append(SystemDll);
+
+	WIN32_FIND_DATA findFileData;
+	HANDLE hFind = FindFirstFile(SystemFileName.c_str(), &findFileData);
+	
+	if (hFind == INVALID_HANDLE_VALUE) 
+	{
+		return false;
+	}
+    
+	FindClose(hFind);
+	return true;
+}
+
+bool DotNetCheck::CheckIsInstalled()
 {
 	if (IsInstalled())
-		return;
+		return true;
 
 	if (IDYES == MessageBox( NULL,
 			"The plugin requires .NET runtime to be installed.\n Would you like to install it now?",
@@ -77,7 +106,9 @@ void DotNetCheck::CheckIsInstalled()
 		
 		ShellExecuteEx(&ShExecInfo);
 		
-		WaitForSingleObject(ShExecInfo.hProcess,INFINITE);
+		WaitForSingleObject(ShExecInfo.hProcess, INFINITE);
 	}
+
+	return IsInstalled();
 }
 
