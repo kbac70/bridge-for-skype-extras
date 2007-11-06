@@ -93,7 +93,6 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="Properties\InTheCallSettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>InTheCallSettings.Designer.cs</LastGenOutput>
@@ -143,6 +142,7 @@
   <ItemGroup>
     <Content Include="Plugin\Resources\paypal.png" />
     <Content Include="Plugin\Resources\phone.png" />
+    <None Include="app.config" />
     <None Include="Plugin\Resources\status.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

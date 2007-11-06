@@ -127,30 +127,26 @@ namespace InACall.Impl
 
         private void OnSkypeCallStatusChanged(Call call, TCallStatus status)
         {
-            switch (call.Type)
+            if (call.Type != TCallType.cltUnknown)
             {
-                case TCallType.cltIncomingP2P:
+                if (call.Type == TCallType.cltIncomingP2P)
+                {
+                    if (status == TCallStatus.clsRinging)
                     {
-                        if (status == TCallStatus.clsRinging)
-                        {
-                            hintBusyCalling(call); 
-                        }
-                        break;
+                        hintBusyCalling(call); 
                     }
-                case TCallType.cltOutgoingP2P:
-                    {
-                        if (status == TCallStatus.clsInProgress)
-                        {
-                            CallStarted();
-                        } 
-                        else if (status == TCallStatus.clsFinished || 
-                            status == TCallStatus.clsRefused ||
-                            status == TCallStatus.clsFailed )
-                        {
-                            CallEnded();                        
-                        }
-                        break;
-                    }
+                }
+
+                if (status == TCallStatus.clsInProgress)
+                {
+                    CallStarted();
+                }
+                else if (status == TCallStatus.clsFinished ||
+                    status == TCallStatus.clsRefused ||
+                    status == TCallStatus.clsFailed)
+                {
+                    CallEnded();
+                }
             }
         }
 
