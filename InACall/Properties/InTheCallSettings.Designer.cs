@@ -37,7 +37,7 @@ namespace InACall.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("In The Call")]
+        [global::System.Configuration.DefaultSettingValueAttribute("In a Call")]
         public string MoodText {
             get {
                 return ((string)(this["MoodText"]));
@@ -80,6 +80,18 @@ namespace InACall.Properties {
             }
             set {
                 this["ShouldRemainInvisible"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsFirstRun {
+            get {
+                return ((bool)(this["IsFirstRun"]));
+            }
+            set {
+                this["IsFirstRun"] = value;
             }
         }
     }

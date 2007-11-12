@@ -127,7 +127,7 @@
     <value>Ok</value>
   </data>
   <data name="DefaultMoodText" xml:space="preserve">
-    <value>I'm on the call</value>
+    <value>I am in a call</value>
   </data>
   <data name="DoNotChangeStatusText" xml:space="preserve">
     <value>Do not change user status</value>

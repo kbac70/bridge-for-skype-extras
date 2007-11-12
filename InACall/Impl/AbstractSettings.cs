@@ -68,6 +68,12 @@ namespace InACall.Impl
             set;
         }
 
+        public abstract bool IsFirstRun
+        {
+            get;
+            set;
+        }
+
         public abstract void Save();
     }
 }

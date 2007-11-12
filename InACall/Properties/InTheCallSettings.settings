@@ -1,12 +1,12 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="InTheCall.Properties" GeneratedClassName="InTheCallSettings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="InACall.Properties" GeneratedClassName="InTheCallSettings">
   <Profiles />
   <Settings>
     <Setting Name="ShouldChangeMoodText" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="MoodText" Type="System.String" Scope="User">
-      <Value Profile="(Default)">In The Call</Value>
+      <Value Profile="(Default)">In a Call</Value>
     </Setting>
     <Setting Name="ShouldChangeUserStatus" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
@@ -15,6 +15,9 @@
       <Value Profile="(Default)">cusDoNotDisturb</Value>
     </Setting>
     <Setting Name="ShouldRemainInvisible" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="IsFirstRun" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>

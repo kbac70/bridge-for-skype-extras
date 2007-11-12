@@ -88,7 +88,7 @@ namespace InACall.Plugin {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to I&apos;m on the call.
+        ///   Looks up a localized string similar to I am in a call.
         /// </summary>
         internal static string DefaultMoodText {
             get {

@@ -87,6 +87,7 @@ namespace InACall.Plugin
                     this.userStatusManager.OperationType == UserStatusOperationType.AllowChangingStatus;
             settings.UserStatus = this.userStatusManager.UserStatus;
             settings.ShouldRemainInvisible = this.userStatusManager.ShouldRemainInvisible;
+            settings.IsFirstRun = false;
         }
 
         private void SettingsForm_Load(object sender, EventArgs e)
@@ -96,7 +97,7 @@ namespace InACall.Plugin
 
             this.rbtAllowMoodChange.Checked = settings.ShouldChangeMoodText;
             this.rbtNoMoodChange.Checked = !this.rbtAllowMoodChange.Checked;
-            if (this.rbtNoMoodChange.Checked && settings.MoodText.Equals(""))// || settings.MoodText.Equals(EMPTY_RTF)))
+            if (settings.IsFirstRun)// || settings.MoodText.Equals(EMPTY_RTF)))
             {
                 //Bitmap bmp = Image.FromHbitmap(Properties.Resources.phone.GetHbitmap());
                 //Clipboard.SetDataObject(bmp);

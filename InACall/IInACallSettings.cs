@@ -62,5 +62,13 @@ namespace InACall
         /// Persists the settings valuses into a storage
         /// </summary>
         void Save();
+        /// <summary>
+        /// Indicates the first execution of the application, during which the defaults are being used for setting values
+        /// </summary>
+        bool IsFirstRun
+        {
+            get;
+            set;
+        }
     }
 }

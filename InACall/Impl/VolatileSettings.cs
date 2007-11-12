@@ -97,5 +97,17 @@ namespace InACall.Impl
             throw new NotSupportedException();
         }
 
+        public override bool IsFirstRun
+        {
+            get
+            {
+                return userSettings.IsFirstRun;
+            }
+            set
+            {
+                throw new NotSupportedException();
+            }
+        }
+
     }
 }

@@ -89,5 +89,17 @@ namespace InACall.Impl
             }
         }
 
+        public override bool IsFirstRun
+        {
+            get
+            {
+                return Properties.InTheCallSettings.Default.IsFirstRun;
+            }
+            set
+            {
+                Properties.InTheCallSettings.Default.IsFirstRun = false;
+            }
+        }
+
     }
 }
