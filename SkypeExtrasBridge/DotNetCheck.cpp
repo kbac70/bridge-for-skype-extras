@@ -1,3 +1,12 @@
+// Copyright 2007 InACall Skype Plugin by KBac Labs
+//	http://code.google.com/p/bridge-for-skype-extras/
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this product except in compliance with the License. You may obtain a copy of the License at
+//	http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and limitations under the License.
+
 #include "stdafx.h"
 #include "DotNetCheck.h"
 #include "Shellapi.h"
@@ -33,17 +42,17 @@ bool DotNetCheck::IsInstalled()
 	std::string frameworkDir(m_dotnetDir);
 	frameworkDir.append("*");
 
-	WIN32_FIND_DATA findFileData;	
+	WIN32_FIND_DATA findFileData;
 	HANDLE hFind = FindFirstFile(frameworkDir.c_str(), &findFileData);
-	
-	if (hFind == INVALID_HANDLE_VALUE) 
+
+	if (hFind == INVALID_HANDLE_VALUE)
 	{
 		return false;
 	}
 
 	bool ret = false;
 	// List all the files and directories in the .NET framework directory.
-    while (FindNextFile(hFind, &findFileData) != 0) 
+    while (FindNextFile(hFind, &findFileData) != 0)
     {
 		if (findFileData.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY &&
 			findFileData.cFileName && findFileData.cFileName[0] == 'v' &&
@@ -54,29 +63,29 @@ bool DotNetCheck::IsInstalled()
 			break;
 		}
 	}
-    
+
 	FindClose(hFind);
 	return ret;
 }
 
-bool DotNetCheck::ContainsSystemDll(const char* const lpszDirName) const 
+bool DotNetCheck::ContainsSystemDll(const char* const lpszDirName) const
 {
 	assert(lpszDirName);
 
 	static const std::string SystemDll = "\\System.dll";
-	
+
 	std::string SystemFileName(m_dotnetDir);
 	SystemFileName.append(lpszDirName);
 	SystemFileName.append(SystemDll);
 
 	WIN32_FIND_DATA findFileData;
 	HANDLE hFind = FindFirstFile(SystemFileName.c_str(), &findFileData);
-	
-	if (hFind == INVALID_HANDLE_VALUE) 
+
+	if (hFind == INVALID_HANDLE_VALUE)
 	{
 		return false;
 	}
-    
+
 	FindClose(hFind);
 	return true;
 }
@@ -98,14 +107,14 @@ bool DotNetCheck::CheckIsInstalled()
 		ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
 		ShExecInfo.hwnd = NULL;
 		ShExecInfo.lpVerb = NULL;
-		ShExecInfo.lpFile = "http://www.microsoft.com/downloads/details.aspx?FamilyID=0856EACB-4362-4B0D-8EDD-AAB15C5E04F5&displaylang=en";		
-		ShExecInfo.lpParameters = "";	
+		ShExecInfo.lpFile = "http://www.microsoft.com/downloads/details.aspx?FamilyID=0856EACB-4362-4B0D-8EDD-AAB15C5E04F5&displaylang=en";
+		ShExecInfo.lpParameters = "";
 		ShExecInfo.lpDirectory = NULL;
 		ShExecInfo.nShow = SW_SHOW;
-		ShExecInfo.hInstApp = NULL;	
-		
+		ShExecInfo.hInstApp = NULL;
+
 		ShellExecuteEx(&ShExecInfo);
-		
+
 		WaitForSingleObject(ShExecInfo.hProcess, INFINITE);
 	}
 

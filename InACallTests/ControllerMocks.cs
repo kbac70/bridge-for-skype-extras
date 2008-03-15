@@ -1,3 +1,12 @@
+// Copyright 2007 InACall Skype Plugin by KBac Labs 
+//	http://code.google.com/p/bridge-for-skype-extras/
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// you may not use this product except in compliance with the License. You may obtain a copy of the License at 
+//	http://www.apache.org/licenses/LICENSE-2.0 
+// Unless required by applicable law or agreed to in writing, software distributed under the License is distributed 
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+// See the License for the specific language governing permissions and limitations under the License.
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,7 +27,8 @@ namespace InACall.Tests
         public const string CUSTOM_MOOD_TEXT = "custom mood text";
         public const TUserStatus SKYPE_USER_STATUS = TUserStatus.cusSkypeMe;
         public const TUserStatus CUSTOM_USER_STATUS = TUserStatus.cusDoNotDisturb;
-        public const string USER_DISP_NAME = "user display name";
+        public const int CALL_ID = 1;
+        public const string USER_HANDLE = "userHandle";
 
         public readonly MockRepository repo;
         public readonly IInACallSettings settings;
@@ -50,8 +60,6 @@ namespace InACall.Tests
         public void SetupCtorExpectations()
         {
             Expect.Call(skype.CurrentUser).Return(user);
-            Expect.Call(skype.CurrentUserStatus).Return(TUserStatus.cusInvisible);
-            Expect.Call(user.RichMoodText).Return(SKYPE_MOOD_TEXT);
 
             //TODO investigate why rhinos not working
             //events.UserStatus += null;
@@ -69,31 +77,34 @@ namespace InACall.Tests
             //callStatusEvent = LastCall.GetEventRaiser();
         }
 
-        public void SetupStartCallMoodExpectations(bool isControllerEnabled)
+        public void SetupStartCallMoodExpectations(bool shouldChangeMoodText)
         {
-            SetupCallExpectations(TCallType.cltOutgoingP2P);
-            if (isControllerEnabled)
-            {
-                Expect.Call(skype.CurrentUserProfile).Return(profile);
-                Expect.Call(settings.ShouldChangeMoodText).Return(isControllerEnabled);
-                Expect.Call(settings.MoodText).Return(CUSTOM_MOOD_TEXT);
-                //Expect.Call(settings.ShouldChangeUserStatus).Return(false);
-            }
+            SetupCallExpectations(TCallType.cltOutgoingP2P, shouldChangeMoodText);
+
+            Expect.Call(skype.CurrentUserProfile).Return(profile);
+            Expect.Call(settings.ShouldChangeMoodText).Return(shouldChangeMoodText);
+            Expect.Call(settings.MoodText).Return(CUSTOM_MOOD_TEXT);
+            //Expect.Call(settings.ShouldChangeUserStatus).Return(false);
         }
 
-        public void SetupEndCallMoodExpectations(bool isControllerEnabled)
+        public void SetupEndCallMoodExpectations(bool shouldChangeMoodText)
         {
-            SetupCallExpectations(TCallType.cltOutgoingP2P);
-            if (isControllerEnabled)
-            {
-                Expect.Call(skype.CurrentUserProfile).Return(profile);
-                Expect.Call(settings.ShouldChangeMoodText).Return(isControllerEnabled);
-            }
+            SetupCallExpectations(TCallType.cltOutgoingP2P, shouldChangeMoodText);
+            
+            Expect.Call(skype.CurrentUserProfile).Return(profile);
+            Expect.Call(settings.ShouldChangeMoodText).Return(shouldChangeMoodText);
         }
 
-        public void SetupCallExpectations(TCallType callType)
+        public void SetupCallExpectations(TCallType callType, bool shouldChangeMoodText)
         {
-            Expect.Call(call.Type).Return(callType);
+            Expect.Call(call.Type).Return(callType).Repeat.Twice();
+            Expect.Call(call.Id).Return(CALL_ID);
+
+            if (shouldChangeMoodText)
+            {
+                Expect.Call(skype.CurrentUser).Return(user);
+                Expect.Call(user.Handle).Return(USER_HANDLE).Repeat.Twice();
+            }
         }
 
         public void SetupUserStatusExpectations(bool shouldChangeUserStatus,
@@ -117,10 +128,12 @@ namespace InACall.Tests
             }
         }
 
-        public void EmulateAndVerifySkypeAPIConnect()
+        public void EmulateAndVerifySkypeAPIConnect()        
         {
             Expect.Call(skype.CurrentUser).Return(user);
-            Expect.Call(user.DisplayName).Return(USER_DISP_NAME).Repeat.AtLeastOnce();
+            Expect.Call(user.Handle).Return(USER_HANDLE).Repeat.AtLeastOnce();
+            Expect.Call(user.MoodText).Return(CUSTOM_MOOD_TEXT).Repeat.Twice();
+            Expect.Call(skype.CurrentUserStatus).Return(TUserStatus.cusAway);
             repo.ReplayAll();
             skypeDummy._UserMood(user, SKYPE_MOOD_TEXT);
             repo.VerifyAll();

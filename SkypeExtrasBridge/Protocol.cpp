@@ -1,3 +1,12 @@
+// Copyright 2007 InACall Skype Plugin by KBac Labs
+//	http://code.google.com/p/bridge-for-skype-extras/
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this product except in compliance with the License. You may obtain a copy of the License at
+//	http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and limitations under the License.
+
 #include "stdafx.h"
 #include "Protocol.h"
 
@@ -28,7 +37,7 @@ long Protocol::ExtractMessageID(char* Buffer, std::string& Payload)
 	assert(Buffer != NULL);
 
 	char* c = Buffer;
-	int i = 0; 
+	int i = 0;
 
 	while (*c != 0 && i < BUFFER_SIZE)
 	{
@@ -50,12 +59,12 @@ long Protocol::ExtractMessageID(char* Buffer, std::string& Payload)
 }
 
 long Protocol::ExtractHResult(std::string& Payload)
-{	
+{
 	char buffer[BUFFER_SIZE];
 	memcpy(buffer, Payload.c_str(), Payload.length());
 
 	char* c = buffer;
-	int i = 0; 
+	int i = 0;
 
 	while (*c != 0 && i < BUFFER_SIZE)
 	{
@@ -75,16 +84,16 @@ long Protocol::ExtractHResult(std::string& Payload)
 	return ret;
 }
 
-int Protocol::EncodeOpenRequest(char* Buffer, const char* PluginID, int ContextType, const char* Participants, 
-		const char* ContextRef, const char* UniqueID, const char* URIParams) 
+int Protocol::EncodeOpenRequest(char* Buffer, const char* PluginID, int ContextType, const char* Participants,
+		const char* ContextRef, const char* UniqueID, const char* URIParams)
 {
 	assert(Buffer != NULL);
 	assert(PluginID != NULL);
 
-	return sprintf_s(Buffer, BUFFER_SIZE, "%s|%s|%d|%s|%s|%s|%s" , 
-			PluginID, 
+	return sprintf_s(Buffer, BUFFER_SIZE, "%s|%s|%d|%s|%s|%s|%s" ,
+			PluginID,
 			REQ_OPEN,
-			ContextType, 
+			ContextType,
 			Participants ? Participants : "",
 			ContextRef   ? ContextRef   : "",
 			UniqueID     ? UniqueID     : "",
@@ -97,8 +106,8 @@ int Protocol::EncodeShowSettingsDlg(char* Buffer, const char* PluginID, const un
 	assert(Buffer != NULL);
 	assert(PluginID != NULL);
 
-	return sprintf_s(Buffer, BUFFER_SIZE, "%s|%s|%d" , 
-			PluginID, 
+	return sprintf_s(Buffer, BUFFER_SIZE, "%s|%s|%d" ,
+			PluginID,
 			REQ_SHOW_SETTINGS_DLG,
 			WndOwner
 		);
@@ -109,8 +118,8 @@ int Protocol::EncodeShutdown(char* Buffer, const char* PluginID)
 	assert(Buffer != NULL);
 	assert(PluginID != NULL);
 
-	return sprintf_s(Buffer, BUFFER_SIZE, "%s|%s" , 
-			PluginID, 
+	return sprintf_s(Buffer, BUFFER_SIZE, "%s|%s" ,
+			PluginID,
 			REQ_SHUTDOWN
 		);
 }
@@ -127,7 +136,7 @@ int Protocol::EncodeResponseThreadAborted(char* Buffer,	const long ID, const cha
 {
 	assert(Buffer != NULL);
 	assert(Payload != NULL);
-	
+
 	return sprintf_s(Buffer, BUFFER_SIZE, "%d|%d|%s", ID, E_ABORT, Payload);
 }
 
@@ -135,7 +144,7 @@ int Protocol::EncodeResponseTimeout(char* Buffer, const long ID, const char*Payl
 {
 	assert(Buffer != NULL);
 	assert(Payload != NULL);
-	
+
 	return sprintf_s(Buffer, BUFFER_SIZE, "%d|%d|%s", ID, E_ACCESSDENIED, Payload);
 }
 

@@ -1,0 +1,10 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <StartArguments>InACall.Tests.dll</StartArguments>
+    <StartWorkingDirectory>C:\Documents and Settings\kbac\My Documents\Visual Studio 2005\Projects\skype.plugins\InACallTests\bin\Release\</StartWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <StartArguments>InACall.Tests.dll</StartArguments>
+    <StartWorkingDirectory>C:\Documents and Settings\kbac\My Documents\Visual Studio 2005\Projects\skype.plugins\InACallTests\bin\Release\</StartWorkingDirectory>
+  </PropertyGroup>
+</Project>

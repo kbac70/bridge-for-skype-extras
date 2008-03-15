@@ -1,3 +1,12 @@
+// Copyright 2007 InACall Skype Plugin by KBac Labs 
+//	http://code.google.com/p/bridge-for-skype-extras/
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// you may not use this product except in compliance with the License. You may obtain a copy of the License at 
+//	http://www.apache.org/licenses/LICENSE-2.0 
+// Unless required by applicable law or agreed to in writing, software distributed under the License is distributed 
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+// See the License for the specific language governing permissions and limitations under the License.
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -26,14 +35,6 @@ namespace InACall.Tests
         protected override void TearDown()
         {
             
-        }
-
-        [Test]
-        public void TestEnabled()
-        {
-            Assert.IsTrue(controller.Enabled);
-            controller.Enabled = false;
-            Assert.IsFalse(controller.Enabled);
         }
 
         [Test]
@@ -76,17 +77,18 @@ namespace InACall.Tests
         public void ValidateConstructorExpectations()
         {
             ControllerMocks mocks = new ControllerMocks();
-            Assert.IsNotNull(CreateAndVerifyController(mocks));
+            IController controller = CreateAndVerifyController(mocks);
+            Assert.IsNotNull(controller);
         }
 
-        delegate void CallSetupHandler(bool isControllerEnabled);
+        delegate void CallSetupHandler(bool shouldChangeMoodText);
 
         private void ValidateCustomMoodText(ControllerMocks mocks, 
-                CallSetupHandler callSetupHandler, bool isControllerEnabled, 
+                CallSetupHandler callSetupHandler, bool shouldChangeMoodText,
                 string expectedMood, TCallStatus callStatus)
         {
             mocks.repo.BackToRecordAll();
-            callSetupHandler(isControllerEnabled);
+            callSetupHandler(shouldChangeMoodText);
             mocks.repo.ReplayAll();
             mocks.EmulateCall(callStatus);
             Assert.AreEqual(expectedMood, mocks.profile.RichMoodText);
@@ -95,12 +97,12 @@ namespace InACall.Tests
 
 
         private void ValidateCustomUserStatus(ControllerMocks mocks,
-                CallSetupHandler callSetupHandler, bool isControllerEnabled, 
+                CallSetupHandler callSetupHandler, bool shouldChangeMoodText,
                 bool shouldChangeUserStatus, bool shouldRemainInvisible, 
                 TCallStatus callStatus, TUserStatus userStatus)
         {
             mocks.repo.BackToRecordAll();
-            callSetupHandler(isControllerEnabled);
+            callSetupHandler(shouldChangeMoodText);
             mocks.SetupUserStatusExpectations(shouldChangeUserStatus,
                     shouldRemainInvisible,
                     userStatus,
@@ -112,8 +114,8 @@ namespace InACall.Tests
             mocks.repo.VerifyAll();
         }
 
-        private void ValidateMoodTextWorking(bool shouldEnableController, 
-                string startMoodText, string endMoodText)
+        private void ValidateMoodTextWorking(bool shouldChangeMoodText,
+            string startMoodText, string endMoodText)
         {
             ControllerMocks mocks = new ControllerMocks();
             IController controller = CreateAndVerifyController(mocks);
@@ -122,39 +124,29 @@ namespace InACall.Tests
 
             Assert.IsNull(mocks.profile.RichMoodText);
 
-            controller.Enabled = shouldEnableController;
-            Assert.AreEqual(shouldEnableController, controller.Enabled);
             //start the call
-            ValidateCustomMoodText(mocks,
+            ValidateCustomMoodText(mocks, 
                     mocks.SetupStartCallMoodExpectations,
-                    controller.Enabled,
+                    shouldChangeMoodText,
                     startMoodText,
                     TCallStatus.clsInProgress
                 );
             //end the call
-            ValidateCustomMoodText(mocks,
+            ValidateCustomMoodText(mocks, 
                     mocks.SetupEndCallMoodExpectations,
-                    controller.Enabled,
+                    shouldChangeMoodText,
                     endMoodText,
                     TCallStatus.clsFinished
                 );
         }
 
         [Test]
-        public void ValidateMoodTextForEnabledController()
+        public void ValidateMoodTextManagement()
         {
-            ValidateMoodTextWorking(true, 
-                    ControllerMocks.CUSTOM_MOOD_TEXT, 
-                    ControllerMocks.SKYPE_MOOD_TEXT
-                );
-        }
-
-        [Test]
-        public void ValidateMoodTextForDisabledController()
-        {
-            ValidateMoodTextWorking(false,
-                    null,
-                    null
+            ValidateMoodTextWorking(
+                    true, //shouldChangeMoodText
+                    ControllerMocks.CUSTOM_MOOD_TEXT,
+                    ControllerMocks.CUSTOM_MOOD_TEXT
                 );
         }
 
@@ -166,12 +158,10 @@ namespace InACall.Tests
             mocks.repo.BackToRecordAll();
             mocks.EmulateAndVerifySkypeAPIConnect();
 
-            Assert.IsTrue(controller.Enabled);
-
             //start the call
             ValidateCustomUserStatus(mocks,
                     mocks.SetupStartCallMoodExpectations,
-                    controller.Enabled,
+                    true, // shouldChangeMoodText
                     true,
                     true,
                     TCallStatus.clsInProgress,
@@ -180,7 +170,7 @@ namespace InACall.Tests
             //end the call
             ValidateCustomUserStatus(mocks,
                     mocks.SetupEndCallMoodExpectations,
-                    controller.Enabled,
+                    true, // shouldChangeMoodText
                     true,
                     true,
                     TCallStatus.clsFinished,

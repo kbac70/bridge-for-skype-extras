@@ -1,3 +1,12 @@
+// Copyright 2007 InACall Skype Plugin by KBac Labs 
+//	http://code.google.com/p/bridge-for-skype-extras/
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// you may not use this product except in compliance with the License. You may obtain a copy of the License at 
+//	http://www.apache.org/licenses/LICENSE-2.0 
+// Unless required by applicable law or agreed to in writing, software distributed under the License is distributed 
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+// See the License for the specific language governing permissions and limitations under the License.
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,45 +19,41 @@ namespace InACall.Impl
 
     internal class SkypeController : IController
     {
-        protected readonly IInACallSettings userSettings;
+        protected const string INVALID_USER_HANLDE = "";
+
+        protected readonly IInACallSettings engagedSettings;
+
+        private readonly IInACallSettings disenagagedSettings;
 
         protected readonly SkypeServices services;
 
-        protected string userDisplayName;
+        private readonly Dictionary<int, ICall> activeCalls;
 
-        private IInACallSettings disenagagedSettings;
-
-        private bool isEngaged;
-
-        private bool isEnabled;
+        protected String ownerHandle;
 
         public SkypeController(IInACallSettings userSettings, SkypeServices skype)
         {
-            this.userSettings = userSettings;
+            this.engagedSettings = userSettings;
             this.services = skype;
-            this.isEnabled = true;
+            this.ownerHandle = INVALID_USER_HANLDE;
+            this.activeCalls = new Dictionary<int,ICall>();
 
             Properties.InTheCallSettings.Default.PropertyChanged +=
                     new PropertyChangedEventHandler(OnSettingsChanged);
 
+            IUser dummy = services.Skype.CurrentUser; //request permission to use skype API...
+
             this.disenagagedSettings = new VolatileSettings(userSettings);
 
-            this.disenagagedSettings.UserStatus = this.services.Skype.CurrentUserStatus;
             this.services.Events.UserStatus += this.OnSkypeUserStatusChanged;
             this.services.Events.OnlineStatus += this.OnSkypeOnlineStatusChanged;
-
-            IUser user = this.services.Skype.CurrentUser;
-            this.userDisplayName = user.DisplayName;
-            this.disenagagedSettings.MoodText = user != null ? user.RichMoodText : "";
             this.services.Events.UserMood += this.OnSkypeUserMoodChanged;
-
             this.services.Events.CallStatus += this.OnSkypeCallStatusChanged;            
         }
 
         ~SkypeController()
         {
-            isEnabled = false;
-            CallEnded();
+            Disengage(); 
         }
 
         public SkypeServices Services
@@ -63,48 +68,60 @@ namespace InACall.Impl
         {
             get 
             { 
-                return this.userSettings; 
+                return this.engagedSettings; 
             }
         }
 
-        public bool Enabled
+        public bool Engaged
         {
             get
             {
-                return isEnabled;
+                return this.activeCalls.Count > 0;
             }
-            set
+        }
+
+        private void Disengage()
+        {
+            if (Engaged)
             {
-                if (isEnabled == value) return;
-
-                if (isEnabled && isEngaged)
-                {
-                    CallEnded();
-                }
-
-                isEnabled = value;
+                activeCalls.Clear();
+                ProcessCall();
             }
+
         }
 
         private void OnSettingsChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (isEngaged)
+        }
+
+        private void retrieveCurrentUser()
+        {
+            if (this.ownerHandle == INVALID_USER_HANLDE)
             {
+                IUser user = this.services.Skype.CurrentUser;
+                if (user != null)
+                {
+                    this.ownerHandle = user.Handle;
+                    this.disenagagedSettings.MoodText = user.MoodText;
+                    this.disenagagedSettings.UserStatus = this.services.Skype.CurrentUserStatus;
+                }
             }
         }
 
-        private bool isCurrentUser(User user)
+        private bool IsOwner(User user)
         {
-            return user.DisplayName.Equals(userDisplayName);
+            retrieveCurrentUser();
+            return user != null && user.Handle != null && this.ownerHandle == user.Handle;
         }
 
         private void OnSkypeUserStatusChanged(TUserStatus status)
         {
             if (status == TUserStatus.cusLoggedOut)
             {
-                isEngaged = false;
+                Disengage();
+                this.ownerHandle = INVALID_USER_HANLDE;
             }
-            else if (!isEngaged) 
+            else if (!Engaged) 
             {
                 this.disenagagedSettings.UserStatus = status;
             }
@@ -112,80 +129,72 @@ namespace InACall.Impl
 
         private void OnSkypeOnlineStatusChanged(User user, TOnlineStatus status)
         {
-            if (isCurrentUser(user) && !isEngaged)
+            if (IsOwner(user) && !Engaged)
             {
             }
         }
 
         private void OnSkypeUserMoodChanged(User user, String mood)
         {
-            if (isCurrentUser(user) && !isEngaged)
+            if (IsOwner(user) && !Engaged)
             {
-                this.disenagagedSettings.MoodText = mood;
-            }
+                this.disenagagedSettings.MoodText = user.MoodText;
+            }            
         }
 
         private void OnSkypeCallStatusChanged(Call call, TCallStatus status)
         {
-            if (call.Type != TCallType.cltUnknown)
+            if (call != null && call.Type != TCallType.cltUnknown)
             {
                 if (call.Type == TCallType.cltIncomingP2P)
                 {
                     if (status == TCallStatus.clsRinging)
                     {
-                        hintBusyCalling(call); 
+                        IssueHint(call); 
                     }
                 }
 
-                if (status == TCallStatus.clsInProgress)
+                lock (this)
                 {
-                    CallStarted();
+                    if (status == TCallStatus.clsInProgress)
+                    {
+                        this.activeCalls.Add(call.Id, call);
+                        ProcessCall();
+
+                    }
+                    else if (status == TCallStatus.clsFinished ||
+                        status == TCallStatus.clsRefused ||
+                        status == TCallStatus.clsFailed)                        
+                    {
+                        activeCalls.Remove(call.Id);
+                        if (!Engaged)
+                        {
+                            ProcessCall();
+                        }
+                    }
                 }
-                else if (status == TCallStatus.clsFinished ||
-                    status == TCallStatus.clsRefused ||
-                    status == TCallStatus.clsFailed)
-                {
-                    CallEnded();
-                }
             }
         }
 
-        private void CallStarted()
-        {
-            this.isEngaged = true;
-            IndicateBusyCalling();
-        }
-
-        private void CallEnded()
-        {
-            if (isEngaged)
-            {
-                isEngaged = false;
-                IndicateBusyCalling();
-            }
-        }
-
-        private void hintBusyCalling(Call call)
+        private void IssueHint(Call call)
         {
 
         }
 
-        private void IndicateBusyCalling()
+        private void ProcessCall()
         {
-            if (!isEnabled)
-            {
-                return;
-            }
-
-            IInACallSettings settings = isEngaged ? userSettings : disenagagedSettings;
+            IInACallSettings settings = Engaged ? engagedSettings : disenagagedSettings;
             
             if (settings.ShouldChangeMoodText)
             {
-                services.Skype.CurrentUserProfile.RichMoodText = settings.MoodText;
+                if (IsOwner(services.Skype.CurrentUser))
+                {
+                    services.Skype.CurrentUserProfile.RichMoodText = settings.MoodText;
+                }
             }
 
             if (settings.ShouldChangeUserStatus &&
-                ((disenagagedSettings.UserStatus == TUserStatus.cusInvisible && !userSettings.ShouldRemainInvisible) ||
+                ((disenagagedSettings.UserStatus == TUserStatus.cusInvisible && !engagedSettings.ShouldRemainInvisible) ||
                   disenagagedSettings.UserStatus != TUserStatus.cusInvisible))
             {
                 services.Skype.ChangeUserStatus(settings.UserStatus);

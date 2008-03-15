@@ -1,3 +1,12 @@
+// Copyright 2007 InACall Skype Plugin by KBac Labs
+//	http://code.google.com/p/bridge-for-skype-extras/
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this product except in compliance with the License. You may obtain a copy of the License at
+//	http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and limitations under the License.
+
 #include "stdafx.h"
 #include "PipePumpingThread.h"
 #include "AnonymousPipe.h"
@@ -6,7 +15,7 @@
 
 #define PROCESS_TERMINATION_ALLOWANCE 1000
 
-DWORD PipeManagingThread( LPVOID* pArguments ) 
+DWORD PipeManagingThread( LPVOID* pArguments )
 {
 	assert(pArguments != NULL);
 
@@ -23,7 +32,7 @@ DWORD PipeManagingThread( LPVOID* pArguments )
 			{
 				std::string payload(t.NextRequest());
 				pipe.Write(payload);
-			} 
+			}
 			else
 			{
 				const long responseSize = pipe.ResponseSize();
@@ -87,7 +96,7 @@ std::string& PipePumpingThread::Abort()
 
 void PipePumpingThread::Resume()
 {
-	if (m_IsSuspended) 
+	if (m_IsSuspended)
 		ResumeThread(m_hThread);
 }
 
@@ -96,16 +105,16 @@ long PipePumpingThread::WriteRequest(const std::string& Payload)
 	Resume();
 
 	long ret = msgID++;
-	
-	char buffer[BUFFER_SIZE];	
+
+	char buffer[BUFFER_SIZE];
 	int len = Protocol::EncodeMessageID(buffer, ret, Payload.c_str());
 	if (len > 0)
 	{
 		std::string p = std::string(buffer);
-		m_outQ.push(p);	
+		m_outQ.push(p);
 		return ret;
 	}
-	
+
 	return PipePumpingThread::INVALID_ID;
 }
 
@@ -146,7 +155,7 @@ void PipePumpingThread::ReadResponse(const long id, const std::string& response)
 }
 
 std::string PipePumpingThread::NextRequest()
-{ 
+{
 	Resume();
 
 	if (this->HasRequest())
@@ -155,12 +164,12 @@ std::string PipePumpingThread::NextRequest()
 		m_outQ.pop();
 		return cmd;
 	}
-	return std::string(); 
+	return std::string();
 }
 
-bool PipePumpingThread::HasRequest() 
-{ 
-	return !m_outQ.empty(); 
+bool PipePumpingThread::HasRequest()
+{
+	return !m_outQ.empty();
 }
 
 bool PipePumpingThread::HasResponse(const long id)

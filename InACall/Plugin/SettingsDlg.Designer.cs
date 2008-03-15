@@ -1,3 +1,12 @@
+// Copyright 2007 InACall Skype Plugin by KBac Labs 
+//	http://code.google.com/p/bridge-for-skype-extras/
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// you may not use this product except in compliance with the License. You may obtain a copy of the License at 
+//	http://www.apache.org/licenses/LICENSE-2.0 
+// Unless required by applicable law or agreed to in writing, software distributed under the License is distributed 
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+// See the License for the specific language governing permissions and limitations under the License.
+
 namespace InACall.Plugin
 {
     partial class SettingsDlg
@@ -33,6 +42,7 @@ namespace InACall.Plugin
             this.txtMood = new System.Windows.Forms.RichTextBox();
             this.rbtAllowMoodChange = new System.Windows.Forms.RadioButton();
             this.rbtNoMoodChange = new System.Windows.Forms.RadioButton();
+            this.userStatusManager = new Skype.Extension.StatusManager.UserStatusManager();
             this.picChangeUserStatus = new System.Windows.Forms.PictureBox();
             this.picChangeMoodText = new System.Windows.Forms.PictureBox();
             this.picLine = new System.Windows.Forms.PictureBox();
@@ -41,7 +51,7 @@ namespace InACall.Plugin
             this.grpHeader = new System.Windows.Forms.GroupBox();
             this.header = new System.Windows.Forms.TextBox();
             this.linkLabel = new System.Windows.Forms.LinkLabel();
-            this.userStatusManager = new Skype.Extension.StatusManager.UserStatusManager();
+            this.lblVersion = new System.Windows.Forms.Label();
             this.grpBody.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picChangeUserStatus)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picChangeMoodText)).BeginInit();
@@ -103,6 +113,22 @@ namespace InACall.Plugin
             this.rbtNoMoodChange.Text = "<L10N>";
             this.rbtNoMoodChange.UseVisualStyleBackColor = true;
             this.rbtNoMoodChange.CheckedChanged += new System.EventHandler(this.rbtMoodChange_CheckedChanged);
+            // 
+            // userStatusManager
+            // 
+            this.userStatusManager.AllowChangeStatusText = "<L10N>";
+            this.userStatusManager.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.userStatusManager.BackColor = System.Drawing.Color.Transparent;
+            this.userStatusManager.DoNotChangeStatusText = "<L10N>";
+            this.userStatusManager.Location = new System.Drawing.Point(47, 84);
+            this.userStatusManager.Name = "userStatusManager";
+            this.userStatusManager.OperationType = Skype.Extension.StatusManager.UserStatusOperationType.AllowChangingStatus;
+            this.userStatusManager.RemainInvisibleText = "<L10N>";
+            this.userStatusManager.ShouldRemainInvisible = false;
+            this.userStatusManager.Size = new System.Drawing.Size(196, 87);
+            this.userStatusManager.TabIndex = 4;
+            this.userStatusManager.UserStatus = SKYPE4COMLib.TUserStatus.cusDoNotDisturb;
             // 
             // picChangeUserStatus
             // 
@@ -201,21 +227,15 @@ namespace InACall.Plugin
             this.linkLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.linkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_LinkClicked);
             // 
-            // userStatusManager
+            // lblVersion
             // 
-            this.userStatusManager.AllowChangeStatusText = "<L10N>";
-            this.userStatusManager.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.userStatusManager.BackColor = System.Drawing.Color.Transparent;
-            this.userStatusManager.DoNotChangeStatusText = "<L10N>";
-            this.userStatusManager.Location = new System.Drawing.Point(47, 84);
-            this.userStatusManager.Name = "userStatusManager";
-            this.userStatusManager.OperationType = Skype.Extension.StatusManager.UserStatusOperationType.AllowChangingStatus;
-            this.userStatusManager.RemainInvisibleText = "<L10N>";
-            this.userStatusManager.ShouldRemainInvisible = false;
-            this.userStatusManager.Size = new System.Drawing.Size(196, 87);
-            this.userStatusManager.TabIndex = 4;
-            this.userStatusManager.UserStatus = SKYPE4COMLib.TUserStatus.cusDoNotDisturb;
+            this.lblVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblVersion.Location = new System.Drawing.Point(207, 215);
+            this.lblVersion.Name = "lblVersion";
+            this.lblVersion.Size = new System.Drawing.Size(62, 9);
+            this.lblVersion.TabIndex = 11;
+            this.lblVersion.Text = "@";
+            this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // SettingsDlg
             // 
@@ -224,6 +244,7 @@ namespace InACall.Plugin
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(278, 262);
+            this.Controls.Add(this.lblVersion);
             this.Controls.Add(this.linkLabel);
             this.Controls.Add(this.grpHeader);
             this.Controls.Add(this.btnCancel);
@@ -237,8 +258,8 @@ namespace InACall.Plugin
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "<L10N>";
             this.TopMost = true;
-            this.Shown += new System.EventHandler(this.SettingsDlg_Shown);
             this.Load += new System.EventHandler(this.SettingsForm_Load);
+            this.Shown += new System.EventHandler(this.SettingsDlg_Shown);
             this.grpBody.ResumeLayout(false);
             this.grpBody.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picChangeUserStatus)).EndInit();
@@ -266,6 +287,7 @@ namespace InACall.Plugin
         private System.Windows.Forms.TextBox header;
         private System.Windows.Forms.RichTextBox txtMood;
         private System.Windows.Forms.LinkLabel linkLabel;
+        private System.Windows.Forms.Label lblVersion;
     }
 }
 

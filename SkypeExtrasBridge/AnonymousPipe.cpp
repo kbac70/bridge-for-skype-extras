@@ -1,3 +1,12 @@
+// Copyright 2007 InACall Skype Plugin by KBac Labs
+//	http://code.google.com/p/bridge-for-skype-extras/
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this product except in compliance with the License. You may obtain a copy of the License at
+//	http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and limitations under the License.
+
 #include "stdafx.h"
 #include "AnonymousPipe.h"
 #include "ChildProcessManager.h"
@@ -43,10 +52,10 @@ AnonymousPipe::AnonymousPipe(const std::string& PluginID)
 		m_hChildStdInWrite != INVALID_HANDLE_VALUE)
 	{
 		char szCmdline[BUFFER_SIZE];
-		sprintf_s(szCmdline, 
-				BUFFER_SIZE, 
-				"C:/Documents and Settings/All Users/Application Data/Skype/Plugins/Plugins/%s/xtrshost.exe %s", 
-				m_id.c_str(), 
+		sprintf_s(szCmdline,
+				BUFFER_SIZE,
+				"C:/Documents and Settings/All Users/Application Data/Skype/Plugins/Plugins/%s/xtrshost.exe %s",
+				m_id.c_str(),
 #ifdef _DEBUG_CLIENT
 				"DEBUG"
 #else
@@ -63,7 +72,7 @@ AnonymousPipe::AnonymousPipe(const std::string& PluginID)
 
 AnonymousPipe::~AnonymousPipe()
 {
-	delete m_processManager; 
+	delete m_processManager;
 	m_processManager = NULL;
 
 	Cleanup();
@@ -99,7 +108,7 @@ long AnonymousPipe::ResponseSize()
 	if (m_hChildStdOutRead)
 	{
 		DWORD dwRead = 0;
-		
+
 		char buffer[BUFFER_SIZE];
 		ZeroMemory(buffer, BUFFER_SIZE);
 
@@ -121,23 +130,23 @@ long AnonymousPipe::ResponseSize()
 
 	return 0;
 }
-	
+
 long AnonymousPipe::Read(std::string& Buffer, long ResponseSize)
 {
 	if (m_hChildStdOutRead)
 	{
 		DWORD dwRead = 0;
-		
+
 		char buffer[BUFFER_SIZE];
 		ZeroMemory(buffer, BUFFER_SIZE);
 
-		if (ReadFile(m_hChildStdOutRead, 
-				buffer, 
-				ResponseSize < BUFFER_SIZE ? ResponseSize : BUFFER_SIZE, 
-				&dwRead, 
+		if (ReadFile(m_hChildStdOutRead,
+				buffer,
+				ResponseSize < BUFFER_SIZE ? ResponseSize : BUFFER_SIZE,
+				&dwRead,
 				NULL)
 			)
-		{	
+		{
 			return Protocol::ExtractMessageID(buffer, Buffer);
 		}
 
@@ -149,14 +158,14 @@ void AnonymousPipe::Write(std::string& Payload)
 {
 	if(m_hChildStdOutWrite)
 	{
-		char buffer[BUFFER_SIZE];	
+		char buffer[BUFFER_SIZE];
 		int len = Protocol::EncodeMessage(buffer, Payload);
 		if (len > 0)
 		{
 			DWORD dwWritten = 0;
 			if (!WriteFile(m_hChildStdInWrite, buffer, len, &dwWritten, NULL))
 			{
-				Cleanup();			
+				Cleanup();
 			}
 		}
 	}
