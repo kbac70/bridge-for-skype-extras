@@ -19,15 +19,32 @@ class DotNetCheck
 public:
 	DotNetCheck(void);
 	~DotNetCheck(void);
-
+	
 	bool IsInstalled();
 	bool CheckIsInstalled();
 
 private:
 	std::string m_windowsDir;
 	std::string m_dotnetDir;
-
+	
 	static const std::string DOTNET_DIR;
+	static const std::string DOTNET_POLICY_REG;
 
 	bool ContainsSystemDll(const char* const lpszDirName) const;
+
+	bool PolicyFoundInRegistry() const;
+
+	/******************************************************************
+	Source:			http://support.microsoft.com/default.aspx/kb/914135
+	Function Name:  RegistryGetValue
+	Description:    Obtain the value of a registry key.
+	Inputs:         HKEY hk - The hk of the key to retrieve
+					TCHAR *pszKey - Name of the key to retrieve
+					TCHAR *pszValue - The value that will be retrieved
+					DWORD dwType - The type of the value that will be retrieved
+					LPBYTE data - A buffer to save the retrieved data
+					DWORD dwSize - The size of the data retrieved
+	Results:        true if it is successful, false otherwise
+	******************************************************************/
+	bool RegistryGetValue(HKEY hk, const TCHAR * pszKey, const TCHAR * pszValue, DWORD dwType, LPBYTE data, DWORD dwSize) const;
 };

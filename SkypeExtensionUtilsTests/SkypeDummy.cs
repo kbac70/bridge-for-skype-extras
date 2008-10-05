@@ -468,6 +468,16 @@ namespace Skype.Extension.Utils.Tests
 
         #endregion
 
+        #region 3.8 Members
+
+
+        public string PredictiveDialerCountry
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        #endregion
+
         #endregion
 
         #region _ISkypeEvents_Event Members
@@ -704,7 +714,21 @@ namespace Skype.Extension.Utils.Tests
 
         #endregion
 
+        #region 3.8 Members
+
+
+        public event _ISkypeEvents_SilentModeStatusChangedEventHandler SilentModeStatusChanged;
+
+        public event _ISkypeEvents_UILanguageChangedEventHandler UILanguageChanged;
+
+        public event _ISkypeEvents_UserAuthorizationRequestReceivedEventHandler UserAuthorizationRequestReceived;
+
+        #endregion
+ 
+
         #endregion
 
-    }
+
+
+   }
 }

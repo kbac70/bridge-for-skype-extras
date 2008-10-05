@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual C# Express 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C# Express 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "skype.extension.utils", "SkypeExtensionUtils\skype.extension.utils.csproj", "{A99C62C2-5B6D-4F5B-B907-3D07AB3C1B16}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "inacall.tests", "InACallTests\inacall.tests.csproj", "{DF52F314-9A98-4E7C-9B03-B2D41BC02F24}"
